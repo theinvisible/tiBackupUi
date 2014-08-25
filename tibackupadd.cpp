@@ -52,7 +52,7 @@ void tiBackupAdd::on_comboBackupDevice_currentIndexChanged(int index)
     QString devname = ui->comboBackupDevice->itemData(index).toString();
     ui->comboBackupPartition->clear();
 
-    qDebug() << "selected dev:" << devname;
+    qDebug() << "selected dev2:" << devname;
     DeviceDisk selDisk;
     selDisk.devname = devname;
     selDisk.readPartitions();
