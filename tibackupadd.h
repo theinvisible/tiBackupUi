@@ -20,6 +20,18 @@ public:
 private slots:
     void on_comboBackupDevice_currentIndexChanged(int index);
 
+    void on_comboBackupPartition_currentIndexChanged(int index);
+
+    void on_btnSelectSource_clicked();
+
+    void on_btnSelectDest_clicked();
+
+    void on_btnAddBackupFolder_clicked();
+
+    void on_btnRemoveBackupFolder_clicked();
+
+    void on_btnAddBackupJob_clicked();
+
 private:
     Ui::tiBackupAdd *ui;
 };
