@@ -2,6 +2,9 @@
 #include "ui_mainwindow.h"
 
 #include <QDesktopWidget>
+#include <QDebug>
+
+#include "ticonf.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -12,6 +15,23 @@ MainWindow::MainWindow(QWidget *parent) :
     // Center window on startup
     QRect geom = QApplication::desktop()->availableGeometry();
     move((geom.width() - width()) / 2, (geom.height() - height()) / 2);
+
+    tiConfBackupJobs jobss;
+    jobss.readBackupJobs();
+    QList<tiBackupJob*> jobs = jobss.getJobs();
+    for(int i=0; i < jobs.count(); i++)
+    {
+        tiBackupJob *job = jobs.at(i);
+        qDebug() << "jobs found::" << job->name;
+
+        QHashIterator<QString, QString> it(job->backupdirs);
+        while(it.hasNext())
+        {
+            it.next();
+
+            qDebug() << "source::" << it.key() << "::dest::" << it.value();
+        }
+    }
 }
 
 MainWindow::~MainWindow()
