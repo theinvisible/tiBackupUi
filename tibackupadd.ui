@@ -22,6 +22,16 @@
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <layout class="QFormLayout" name="formLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Backupjob Name</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="leBackupJobName"/>
+        </item>
         <item row="1" column="0">
          <widget class="QLabel" name="label">
           <property name="minimumSize">
@@ -38,20 +48,6 @@
         <item row="1" column="1">
          <widget class="QComboBox" name="comboBackupDevice"/>
         </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>Dateisystem</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QLabel" name="lblDriveType">
-          <property name="text">
-           <string>n/a</string>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="0">
          <widget class="QLabel" name="label_3">
           <property name="text">
@@ -59,18 +55,53 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QComboBox" name="comboBackupPartition"/>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_4">
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>Backupjob Name</string>
+           <string>Dateisystem</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="leBackupJobName"/>
+        <item row="5" column="1">
+         <widget class="QLabel" name="lblDriveType">
+          <property name="text">
+           <string>n/a</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Mountinformation</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <widget class="QLabel" name="lblMountInfo">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QComboBox" name="comboBackupPartition"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnPartitionMount">
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Mount</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>

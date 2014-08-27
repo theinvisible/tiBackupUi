@@ -32,8 +32,15 @@ private slots:
 
     void on_btnAddBackupJob_clicked();
 
+    void on_btnPartitionMount_clicked();
+
 private:
     Ui::tiBackupAdd *ui;
+
+    void updatePartitionInformation();
+
+protected:
+    bool eventFilter(QObject *object, QEvent *event);
 };
 
 #endif // TIBACKUPADD_H
