@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+#include "ticonf.h"
 #include "tibackuplib.h"
 
 namespace Ui {
@@ -33,6 +34,11 @@ private slots:
     void on_btnAddBackupJob_clicked();
 
     void on_btnPartitionMount_clicked();
+
+    void on_btnCancel_clicked();
+
+signals:
+    void jobAdded(tiBackupJob job);
 
 private:
     Ui::tiBackupAdd *ui;

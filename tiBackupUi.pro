@@ -14,13 +14,16 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    tibackupadd.cpp
+    tibackupadd.cpp \
+    tibackupedit.cpp
 
 HEADERS  += mainwindow.h \
-    tibackupadd.h
+    tibackupadd.h \
+    tibackupedit.h
 
 FORMS    += mainwindow.ui \
-    tibackupadd.ui
+    tibackupadd.ui \
+    tibackupedit.ui
 
 unix {
     message(Building for Unix)

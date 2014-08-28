@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "tibackupadd.h"
+#include "tibackupedit.h"
 
 namespace Ui {
 class MainWindow;
@@ -19,9 +20,18 @@ public:
 
 private slots:
     void on_btnAddBackup_clicked();
+    void onjobAdded(tiBackupJob job);
+
+    void onActionAbout();
+
+    void on_btnBackupJobDelete_clicked();
+
+    void on_btnBackupJobEdit_clicked();
 
 private:
     Ui::MainWindow *ui;
+
+    void refreshBackupJobList();
 };
 
 #endif // MAINWINDOW_H

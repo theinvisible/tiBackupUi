@@ -6,9 +6,6 @@
 #include <QStandardItemModel>
 #include <QMessageBox>
 
-#include "ticonf.h"
-#include "tibackuplib.h"
-
 tiBackupAdd::tiBackupAdd(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::tiBackupAdd)
@@ -161,6 +158,12 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
     QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
     QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvBackupFolders->model());
 
+    if(ui->leBackupJobName->text().isEmpty())
+    {
+        QMessageBox::information(this, QString::fromUtf8("Backupjob hinzufügen"), QString::fromUtf8("Es muss ein Name für den Backupjob angegeben werden."));
+        return;
+    }
+
     tiBackupJob job;
     job.name = ui->leBackupJobName->text();
     job.device = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
@@ -183,12 +186,17 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
 
     tiConfBackupJobs jobs;
     jobs.saveBackupJob(job);
+
+    parentWidget()->close();
+
+    emit jobAdded(job);
 }
 
 bool tiBackupAdd::eventFilter(QObject *object, QEvent *event)
 {
     if(object == parentWidget() && event->type() == QEvent::Close)
     {
+        /*
         int ret = QMessageBox::warning(this, QString::fromUtf8("Fenster schließen"),
                                     QString::fromUtf8("Alle Änderungen gehen verloren. Fortfahren?"),
                                     QMessageBox::Yes | QMessageBox::No);
@@ -202,6 +210,9 @@ bool tiBackupAdd::eventFilter(QObject *object, QEvent *event)
             event->ignore();
             return true;
         }
+        */
+
+        return false;
     }
 
     return false;
@@ -251,4 +262,9 @@ void tiBackupAdd::updatePartitionInformation()
         ui->btnPartitionMount->setEnabled(true);
         ui->lblMountInfo->setText(QString("Partition %1 ist nicht gemounted").arg(part.name));
     }
+}
+
+void tiBackupAdd::on_btnCancel_clicked()
+{
+    parentWidget()->close();
 }
