@@ -39,7 +39,7 @@
          <item>
           <widget class="QPushButton" name="btnAddBackup">
            <property name="text">
-            <string>Neue Backup Festplatte hinzufügen</string>
+            <string>Neuen Backupjob hinzufügen</string>
            </property>
           </widget>
          </item>
@@ -64,11 +64,42 @@
     <item>
      <widget class="QGroupBox" name="groupBox">
       <property name="title">
-       <string>Vorhandene Backups</string>
+       <string>Vorhandene Backupjobs</string>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QListView" name="listView"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnBackupJobEdit">
+           <property name="text">
+            <string>Bearbeiten</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnBackupJobDelete">
+           <property name="text">
+            <string>Löschen</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>

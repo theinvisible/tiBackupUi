@@ -16,6 +16,7 @@ tiBackupAdd::tiBackupAdd(QWidget *parent) :
     ui->setupUi(this);
 
     int i=0;
+    ui->btnPartitionMount->setDisabled(true);
 
     // Load available Backup devices
     TiBackupLib blib;
@@ -90,7 +91,7 @@ void tiBackupAdd::on_btnSelectSource_clicked()
 {
     QString startDir = (ui->leSourceFolder->text().isEmpty()) ? "/" : ui->leSourceFolder->text();
 
-    QString dir = QFileDialog::getExistingDirectory(this, tr("Bitte wählen Sie das Quellverzeichnis"),
+    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wählen Sie das Quellverzeichnis"),
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
@@ -100,14 +101,31 @@ void tiBackupAdd::on_btnSelectSource_clicked()
 
 void tiBackupAdd::on_btnSelectDest_clicked()
 {
-    QString startDir = (ui->leDestFolder->text().isEmpty()) ? "/" : ui->leDestFolder->text();
+    QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
+    QString uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
+    QString defaultPath = "/";
 
-    QString dir = QFileDialog::getExistingDirectory(this, tr("Bitte wählen Sie das Zielverzeichnis"),
+    qDebug() << "selected part uuid:" << uuid;
+    DeviceDisk selDisk;
+    selDisk.devname = devname;
+
+    DeviceDiskPartition part = selDisk.getPartitionByUUID(uuid);
+    ui->lblDriveType->setText(part.type);
+
+    TiBackupLib lib;
+    if(lib.isMounted(part.name))
+        defaultPath = lib.getMountDir(part.name);
+
+    QString startDir = (ui->leDestFolder->text().isEmpty()) ? defaultPath : ui->leDestFolder->text();
+
+    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wählen Sie das Zielverzeichnis"),
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
 
     ui->leDestFolder->setText(dir);
+
+    qDebug() << "generic name::" << TiBackupLib::convertPath2Generic(dir, lib.getMountDir(part.name));
 }
 
 void tiBackupAdd::on_btnAddBackupFolder_clicked()
@@ -140,24 +158,28 @@ void tiBackupAdd::on_btnRemoveBackupFolder_clicked()
 
 void tiBackupAdd::on_btnAddBackupJob_clicked()
 {
+    QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
     QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvBackupFolders->model());
-
-    QHash<QString, QString> h;
-    //h.insertMulti("/tmp", "/disk2");
-    //h.insertMulti("/tmp2", "/disk3");
-
-    //model->
-    for(int i=0; i < model->rowCount(); i++)
-    {
-        h.insertMulti(model->item(i, 0)->text(), model->item(i, 1)->text());
-    }
 
     tiBackupJob job;
     job.name = ui->leBackupJobName->text();
     job.device = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
     job.partition_uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
+    job.delete_add_file_on_dest = ui->cbDeleteAddFilesOnDest->isChecked();
+    job.start_backup_on_hotplug = ui->cbBackupOnHotplug->isChecked();
+
+    DeviceDisk selDisk;
+    selDisk.devname = devname;
+
+    DeviceDiskPartition part = selDisk.getPartitionByUUID(job.partition_uuid);
+    TiBackupLib lib;
+
+    QHash<QString, QString> h;
+    for(int i=0; i < model->rowCount(); i++)
+    {
+        h.insertMulti(model->item(i, 0)->text(), TiBackupLib::convertPath2Generic(model->item(i, 1)->text(), lib.getMountDir(part.name)));
+    }
     job.backupdirs = h;
-    job.delete_add_file_on_dest = true;
 
     tiConfBackupJobs jobs;
     jobs.saveBackupJob(job);
@@ -221,10 +243,12 @@ void tiBackupAdd::updatePartitionInformation()
     TiBackupLib lib;
     if(lib.isMounted(part.name))
     {
+        ui->btnPartitionMount->setDisabled(true);
         ui->lblMountInfo->setText(QString("Partition %1 ist gemounted auf %2").arg(part.name, lib.getMountDir(part.name)));
     }
     else
     {
+        ui->btnPartitionMount->setEnabled(true);
         ui->lblMountInfo->setText(QString("Partition %1 ist nicht gemounted").arg(part.name));
     }
 }
