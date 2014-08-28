@@ -17,6 +17,11 @@ public:
     explicit tiBackupEdit(QWidget *parent = 0, tiBackupJob *job = 0);
     ~tiBackupEdit();
 
+private slots:
+    void on_btnSelectSource_clicked();
+
+    void on_btnSelectDest_clicked();
+
 private:
     Ui::tiBackupEdit *ui;
 
