@@ -51,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onActionAbout()));
     connect(ui->actionAddBackupjob, SIGNAL(triggered()), this, SLOT(on_btnAddBackup_clicked()));
+    connect(ui->actionPreferences, SIGNAL(triggered()), this, SLOT(onActionPreferences()));
 
     refreshBackupJobList();
 }
@@ -194,4 +195,18 @@ void MainWindow::on_btnBackupJobEdit_clicked()
 void MainWindow::on_tvAvailBackupJobs_doubleClicked(const QModelIndex &index)
 {
     on_btnBackupJobEdit_clicked();
+}
+
+void MainWindow::onActionPreferences()
+{
+    QMainWindow *prefWindow = new QMainWindow(this, Qt::Dialog);
+    prefWindow->setWindowModality(Qt::WindowModal);
+
+    tiPreferences *f = new tiPreferences(prefWindow);
+    prefWindow->setCentralWidget(f);
+    prefWindow->setMinimumSize(QSize(f->width(),f->height()));
+    prefWindow->setMaximumSize(QSize(f->width(),f->height()));
+    prefWindow->setWindowTitle(windowTitle() + QObject::trUtf8(" - Einstellungen"));
+
+    prefWindow->show();
 }

@@ -15,15 +15,18 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     tibackupadd.cpp \
-    tibackupedit.cpp
+    tibackupedit.cpp \
+    tipreferences.cpp
 
 HEADERS  += mainwindow.h \
     tibackupadd.h \
-    tibackupedit.h
+    tibackupedit.h \
+    tipreferences.h
 
 FORMS    += mainwindow.ui \
     tibackupadd.ui \
-    tibackupedit.ui
+    tibackupedit.ui \
+    tipreferences.ui
 
 unix {
     message(Building for Unix)

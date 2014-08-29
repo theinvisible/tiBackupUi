@@ -21,44 +21,38 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 
 */
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef TIPREFERENCES_H
+#define TIPREFERENCES_H
 
-#include <QMainWindow>
-#include <QModelIndex>
+#include <QWidget>
 
-#include "tibackupadd.h"
-#include "tibackupedit.h"
-#include "tipreferences.h"
+#include "ticonf.h"
 
 namespace Ui {
-class MainWindow;
+class tiPreferences;
 }
 
-class MainWindow : public QMainWindow
+class tiPreferences : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    explicit tiPreferences(QWidget *parent = 0);
+    ~tiPreferences();
 
 private slots:
-    void on_btnAddBackup_clicked();
-    void onjobAdded(tiBackupJob job);
-    void onjobEdited(tiBackupJob job);
+    void on_btnAbort_clicked();
 
-    void onActionAbout();
-    void on_btnBackupJobDelete_clicked();
-    void on_btnBackupJobEdit_clicked();
-    void on_tvAvailBackupJobs_doubleClicked(const QModelIndex &index);
+    void on_btnBackupjobs_clicked();
 
-    void onActionPreferences();
+    void on_btnLogs_clicked();
+
+    void on_btnSave_clicked();
 
 private:
-    Ui::MainWindow *ui;
+    Ui::tiPreferences *ui;
 
-    void refreshBackupJobList();
+    tiConfMain *main_settings;
 };
 
-#endif // MAINWINDOW_H
+#endif // TIPREFERENCES_H
