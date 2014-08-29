@@ -59,6 +59,9 @@ void tiPreferences::on_btnBackupjobs_clicked()
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
 
+    if(dir.isEmpty())
+        return;
+
     ui->leBackupjobsPath->setText(dir);
 }
 
@@ -70,6 +73,9 @@ void tiPreferences::on_btnLogs_clicked()
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
+
+    if(dir.isEmpty())
+        return;
 
     ui->leLogsPath->setText(dir);
 }
