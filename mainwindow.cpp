@@ -1,3 +1,26 @@
+/*
+ *
+tiBackupUi - A intelligent desktop/standalone backup system user interface
+
+Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
+
+    This file is part of tiBackup.
+
+    tiBackupUi is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    tiBackupUi is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with tiBackupUi.  If not, see <http://www.gnu.org/licenses/>.
+
+*/
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -53,6 +76,11 @@ void MainWindow::on_btnAddBackup_clicked()
 }
 
 void MainWindow::onjobAdded(tiBackupJob job)
+{
+    refreshBackupJobList();
+}
+
+void MainWindow::onjobEdited(tiBackupJob job)
 {
     refreshBackupJobList();
 }
@@ -157,8 +185,13 @@ void MainWindow::on_btnBackupJobEdit_clicked()
     prefWindow->setCentralWidget(f);
     prefWindow->setMinimumSize(QSize(f->width(),f->height()));
     prefWindow->setMaximumSize(QSize(f->width(),f->height()));
-    prefWindow->setWindowTitle(windowTitle() + QObject::trUtf8(" - Backupjob bearbeiten"));
+    prefWindow->setWindowTitle(windowTitle() + QObject::trUtf8(" - Backupjob <%1> bearbeiten").arg(jobName));
 
-    //connect(f, SIGNAL(jobEdited(tiBackupJob)), this, SLOT(onjobEdited(tiBackupJob)));
+    connect(f, SIGNAL(jobEdited(tiBackupJob)), this, SLOT(onjobEdited(tiBackupJob)));
     prefWindow->show();
+}
+
+void MainWindow::on_tvAvailBackupJobs_doubleClicked(const QModelIndex &index)
+{
+    on_btnBackupJobEdit_clicked();
 }
