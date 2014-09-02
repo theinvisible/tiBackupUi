@@ -122,6 +122,9 @@ void MainWindow::refreshBackupJobList()
         model->setItem(row, 1, item2);
         model->setItem(row, 2, item3);
     }
+
+    ui->tvAvailBackupJobs->header()->resizeSection(0, 150);
+    ui->tvAvailBackupJobs->header()->resizeSection(1, 300);
 }
 
 void MainWindow::on_btnBackupJobDelete_clicked()

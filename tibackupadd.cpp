@@ -78,6 +78,7 @@ tiBackupAdd::tiBackupAdd(QWidget *parent) :
     model->setHorizontalHeaderLabels(headers);
 
     ui->tvBackupFolders->setModel(model);
+    ui->tvBackupFolders->header()->resizeSection(0, 350);
 }
 
 tiBackupAdd::~tiBackupAdd()
@@ -98,6 +99,10 @@ void tiBackupAdd::on_comboBackupDevice_currentIndexChanged(int index)
     for(int i=0; i < selDisk.partitions.count(); i++)
     {
         DeviceDiskPartition part = selDisk.partitions.at(i);
+
+        if(part.uuid.isEmpty())
+            continue;
+
         ui->comboBackupPartition->insertItem(0, QString("%1 (%2)").arg(part.name, part.uuid), part.uuid);
     }
 }
@@ -189,7 +194,7 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
 
     tiBackupJob job;
     job.name = ui->leBackupJobName->text();
-    job.device = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
+    job.device = ui->comboBackupDevice->itemText(ui->comboBackupDevice->currentIndex());
     job.partition_uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
     job.delete_add_file_on_dest = ui->cbDeleteAddFilesOnDest->isChecked();
     job.start_backup_on_hotplug = ui->cbBackupOnHotplug->isChecked();

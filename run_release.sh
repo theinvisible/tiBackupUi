@@ -1,3 +1,3 @@
 #!/bin/sh
 
-pkexec "/home/rene/DEV/bin/tiBackupUi" "$@"
+sudo /home/rene/DEV/bin/tiBackupUi

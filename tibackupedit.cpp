@@ -35,6 +35,7 @@ tiBackupEdit::tiBackupEdit(QWidget *parent, tiBackupJob *job) :
 {
     ui->setupUi(this);
     currentJob = job;
+    ui->btnPartitionMount->setDisabled(true);
 
     parent->installEventFilter(this);
 
@@ -45,8 +46,26 @@ tiBackupEdit::tiBackupEdit(QWidget *parent, tiBackupJob *job) :
     model->setHorizontalHeaderLabels(headers);
 
     ui->tvBackupFolders->setModel(model);
+    ui->tvBackupFolders->header()->resizeSection(0, 350);
+
+    // Load available Backup devices
+    TiBackupLib blib;
+    QList<DeviceDisk> disks = blib.getAttachedDisks();
+    qDebug() << "disks found:" << disks.count();
+
+    for(int i=0; i < disks.count(); i++)
+    {
+        DeviceDisk disk = disks.at(i);
+
+        qDebug() << "disk:" << disk.devname;
+        if(disk.devtype == "disk")
+        {
+            ui->comboBackupDevice->insertItem(0, QString("%1 - %2 (%3)").arg(disk.vendor, disk.model, disk.devname), disk.devname);
+        }
+    }
 
     updateJobDetails();
+    updatePartitionInformation();
 }
 
 tiBackupEdit::~tiBackupEdit()
@@ -61,7 +80,8 @@ void tiBackupEdit::updateJobDetails()
     model->removeRows(0, model->rowCount());
 
     ui->leBackupJobName->setText(currentJob->name);
-    ui->leBackupPartition->setText(currentJob->partition_uuid);
+    ui->comboBackupDevice->setEditText(currentJob->device);
+    ui->comboBackupPartition->setEditText(currentJob->partition_uuid);
 
     QHashIterator<QString, QString> it(currentJob->backupdirs);
     QStandardItem *item = 0;
@@ -84,6 +104,69 @@ void tiBackupEdit::updateJobDetails()
     ui->cbDeleteAddFilesOnDest->setChecked(currentJob->delete_add_file_on_dest);
     ui->cbBackupOnHotplug->setChecked(currentJob->start_backup_on_hotplug);
     ui->cbSaveLog->setChecked(currentJob->save_log);
+
+    // We must see if the current job disk is attached
+    // Load available Backup devices
+    TiBackupLib blib;
+    QList<DeviceDisk> disks = blib.getAttachedDisks();
+    for(int i=0; i < disks.count(); i++)
+    {
+        DeviceDisk disk = disks.at(i);
+
+        qDebug() << "disk:" << disk.devname;
+        if(disk.devtype == "disk")
+        {
+            disk.readPartitions();
+            for(int j=0; j < disk.partitions.count(); j++)
+            {
+                DeviceDiskPartition part = disk.partitions.at(j);
+
+                if(part.uuid.isEmpty())
+                    continue;
+
+                if(part.uuid == currentJob->partition_uuid)
+                {
+                    // Job disk is attached right now
+                    qDebug() << "job disk is attached right now";
+
+                    int devrow = ui->comboBackupDevice->findData(disk.devname);
+                    int partrow = ui->comboBackupPartition->findData(part.uuid);
+                    qDebug() << "devrow::" << devrow << "::partrow::" << partrow;
+
+                    ui->comboBackupDevice->setCurrentIndex(devrow);
+                    ui->comboBackupPartition->setCurrentIndex(partrow);
+
+                    return;
+                }
+            }
+        }
+    }
+}
+
+void tiBackupEdit::updatePartitionInformation()
+{
+    QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
+    QString uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
+    qDebug() << "tiBackupEdit::updatePartitionInformation() -> devname:" << devname;
+    qDebug() << "tiBackupEdit::updatePartitionInformation() -> uuid:" << uuid;
+
+    DeviceDisk selDisk;
+    selDisk.devname = devname;
+
+    DeviceDiskPartition part = selDisk.getPartitionByUUID(uuid);
+    ui->lblDriveType->setText(part.type);
+
+    TiBackupLib lib;
+    if(lib.isMounted(part.name))
+    {
+        ui->btnPartitionMount->setDisabled(true);
+        ui->lblMountInfo->setText(QString("Partition %1 ist gemounted auf %2").arg(part.name, lib.getMountDir(part.name)));
+    }
+    else
+    {
+        ui->btnPartitionMount->setEnabled(true);
+        ui->lblMountInfo->setText(QString("Partition %1 ist nicht gemounted").arg(part.name));
+    }
 }
 
 bool tiBackupEdit::eventFilter(QObject *object, QEvent *event)
@@ -195,7 +278,7 @@ void tiBackupEdit::on_btnEditBackupJob_clicked()
     }
 
     //job.device = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
-    job.partition_uuid = ui->leBackupPartition->text();
+    //job.partition_uuid = ui->leBackupPartition->text();
     job.delete_add_file_on_dest = ui->cbDeleteAddFilesOnDest->isChecked();
     job.start_backup_on_hotplug = ui->cbBackupOnHotplug->isChecked();
     job.save_log = ui->cbSaveLog->isChecked();
@@ -221,4 +304,52 @@ void tiBackupEdit::on_btnEditBackupJob_clicked()
     parentWidget()->close();
 
     emit jobEdited(job);
+}
+
+void tiBackupEdit::on_comboBackupDevice_currentIndexChanged(int index)
+{
+    // Load available Backup partitions
+    QString devname = ui->comboBackupDevice->itemData(index).toString();
+    ui->comboBackupPartition->clear();
+
+    qDebug() << "tiBackupEdit::on_comboBackupDevice_currentIndexChanged(int index) devname:" << devname;
+    DeviceDisk selDisk;
+    selDisk.devname = devname;
+    selDisk.readPartitions();
+    for(int i=0; i < selDisk.partitions.count(); i++)
+    {
+        DeviceDiskPartition part = selDisk.partitions.at(i);
+
+        if(part.uuid.isEmpty())
+            continue;
+
+        ui->comboBackupPartition->insertItem(0, QString("%1 (%2)").arg(part.name, part.uuid), part.uuid);
+    }
+}
+
+void tiBackupEdit::on_comboBackupPartition_currentIndexChanged(int index)
+{
+    updatePartitionInformation();
+}
+
+void tiBackupEdit::on_btnPartitionMount_clicked()
+{
+    QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
+    QString uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
+    qDebug() << "selected part uuid:" << uuid;
+    DeviceDisk selDisk;
+    selDisk.devname = devname;
+
+    DeviceDiskPartition part = selDisk.getPartitionByUUID(uuid);
+
+    TiBackupLib lib;
+    if(lib.isMounted(part.name))
+    {
+        QMessageBox::information(this, QString::fromUtf8("Mountinformation"), QString::fromUtf8("Das Laufwerk ist schon gemounted."));
+    }
+    else
+    {
+        lib.mountPartition(&part);
+        updatePartitionInformation();
+    }
 }
