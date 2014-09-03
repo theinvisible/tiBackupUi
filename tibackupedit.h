@@ -60,6 +60,8 @@ private slots:
 
     void on_btnPartitionMount_clicked();
 
+    void on_comboBackupPartition_activated(int index);
+
 signals:
     void jobEdited(tiBackupJob job);
 
@@ -67,9 +69,13 @@ private:
     Ui::tiBackupEdit *ui;
 
     tiBackupJob *currentJob;
+    bool currentJobDiskisAttached;
 
     void updateJobDetails();
     void updatePartitionInformation();
+
+    QString getBackupDeviceValue();
+    QString getBackupPartitionValue();
 
 protected:
     bool eventFilter(QObject *object, QEvent *event);

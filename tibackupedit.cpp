@@ -35,6 +35,7 @@ tiBackupEdit::tiBackupEdit(QWidget *parent, tiBackupJob *job) :
 {
     ui->setupUi(this);
     currentJob = job;
+    currentJobDiskisAttached = false;
     ui->btnPartitionMount->setDisabled(true);
 
     parent->installEventFilter(this);
@@ -65,7 +66,8 @@ tiBackupEdit::tiBackupEdit(QWidget *parent, tiBackupJob *job) :
     }
 
     updateJobDetails();
-    updatePartitionInformation();
+    if(currentJobDiskisAttached == true)
+        updatePartitionInformation();
 }
 
 tiBackupEdit::~tiBackupEdit()
@@ -136,6 +138,8 @@ void tiBackupEdit::updateJobDetails()
                     ui->comboBackupDevice->setCurrentIndex(devrow);
                     ui->comboBackupPartition->setCurrentIndex(partrow);
 
+                    currentJobDiskisAttached = true;
+
                     return;
                 }
             }
@@ -166,6 +170,58 @@ void tiBackupEdit::updatePartitionInformation()
     {
         ui->btnPartitionMount->setEnabled(true);
         ui->lblMountInfo->setText(QString("Partition %1 ist nicht gemounted").arg(part.name));
+    }
+}
+
+QString tiBackupEdit::getBackupDeviceValue()
+{
+    QString selDevname = ui->comboBackupDevice->itemText(ui->comboBackupDevice->currentIndex());
+    QString editDevname = ui->comboBackupDevice->currentText();
+
+    qDebug() << "selDev::" << selDevname << "::editDev::" << editDevname << "::";
+
+    if(currentJobDiskisAttached == true)
+    {
+        return selDevname;
+    }
+    else
+    {
+        if(selDevname == editDevname)
+        {
+            return selDevname;
+        }
+        else
+        {
+            return editDevname;
+        }
+    }
+}
+
+QString tiBackupEdit::getBackupPartitionValue()
+{
+    QString selPartition = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
+    QString editPartition = ui->comboBackupPartition->currentText();
+
+    qDebug() << "selPart::" << selPartition << "::editPart::" << editPartition << "::";
+
+    if(currentJobDiskisAttached == true)
+    {
+        return selPartition;
+    }
+    else
+    {
+        if(selPartition == editPartition)
+        {
+            return selPartition;
+        }
+        else
+        {
+            if(ui->comboBackupPartition->itemText(ui->comboBackupPartition->currentIndex()) == editPartition)
+                return selPartition;
+
+            // TODO if currentJob disk is not attached but you change the partition, it returns the wrong value
+            return editPartition;
+        }
     }
 }
 
@@ -209,7 +265,14 @@ void tiBackupEdit::on_btnSelectSource_clicked()
 
 void tiBackupEdit::on_btnSelectDest_clicked()
 {
-    QString startDir = (ui->leDestFolder->text().isEmpty()) ? "/" : ui->leDestFolder->text();
+    QString defaultPath = "/";
+
+    TiBackupLib lib;
+    DeviceDiskPartition part = TiBackupLib::getPartitionByUUID(getBackupPartitionValue());
+    if(lib.isMounted(part.name))
+        defaultPath = lib.getMountDir(part.name);
+
+    QString startDir = (ui->leDestFolder->text().isEmpty()) ? defaultPath : ui->leDestFolder->text();
 
     QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wählen Sie das Zielverzeichnis"),
                                                     startDir,
@@ -254,6 +317,9 @@ void tiBackupEdit::on_btnCancel_clicked()
 
 void tiBackupEdit::on_btnEditBackupJob_clicked()
 {
+    qDebug() << "BackupDeviceValue::" << getBackupDeviceValue();
+    qDebug() << "BackupPartitionValue::" << getBackupPartitionValue();
+
     //QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
     QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvBackupFolders->model());
     tiConfBackupJobs jobs;
@@ -277,8 +343,8 @@ void tiBackupEdit::on_btnEditBackupJob_clicked()
         job.name = ui->leBackupJobName->text();
     }
 
-    //job.device = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
-    //job.partition_uuid = ui->leBackupPartition->text();
+    job.device = getBackupDeviceValue();
+    job.partition_uuid = getBackupPartitionValue();
     job.delete_add_file_on_dest = ui->cbDeleteAddFilesOnDest->isChecked();
     job.start_backup_on_hotplug = ui->cbBackupOnHotplug->isChecked();
     job.save_log = ui->cbSaveLog->isChecked();
@@ -292,10 +358,21 @@ void tiBackupEdit::on_btnEditBackupJob_clicked()
     */
 
     QHash<QString, QString> h;
+    QString dest;
+    TiBackupLib lib;
+    bool diskMounted = false;
+    DeviceDiskPartition part = TiBackupLib::getPartitionByUUID(getBackupPartitionValue());
+    if(lib.isMounted(part.name))
+        diskMounted = true;
+
     for(int i=0; i < model->rowCount(); i++)
     {
+        dest = model->item(i, 1)->text();
+        if(diskMounted == true)
+            dest = TiBackupLib::convertPath2Generic(dest, lib.getMountDir(part.name));
+
         //h.insertMulti(model->item(i, 0)->text(), TiBackupLib::convertPath2Generic(model->item(i, 1)->text(), lib.getMountDir(part.name)));
-        h.insertMulti(model->item(i, 0)->text(), model->item(i, 1)->text());
+        h.insertMulti(model->item(i, 0)->text(), dest);
     }
     job.backupdirs = h;
 
@@ -329,7 +406,7 @@ void tiBackupEdit::on_comboBackupDevice_currentIndexChanged(int index)
 
 void tiBackupEdit::on_comboBackupPartition_currentIndexChanged(int index)
 {
-    updatePartitionInformation();
+    ;
 }
 
 void tiBackupEdit::on_btnPartitionMount_clicked()
@@ -352,4 +429,9 @@ void tiBackupEdit::on_btnPartitionMount_clicked()
         lib.mountPartition(&part);
         updatePartitionInformation();
     }
+}
+
+void tiBackupEdit::on_comboBackupPartition_activated(int index)
+{
+    updatePartitionInformation();
 }
