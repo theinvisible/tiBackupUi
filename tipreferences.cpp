@@ -38,6 +38,11 @@ tiPreferences::tiPreferences(QWidget *parent) :
 
     ui->leBackupjobsPath->setText(main_settings->getValue("paths/backupjobs").toString());
     ui->leLogsPath->setText(main_settings->getValue("paths/logs").toString());
+
+    ui->leSMTPServer->setText(main_settings->getValue("smtp/server").toString());
+    ui->cbSMTPAuth->setChecked(main_settings->getValue("smtp/auth").toBool());
+    ui->leSMTPUsername->setText(main_settings->getValue("smtp/username").toString());
+    ui->leSMTPPassword->setText(main_settings->getValue("smtp/password").toString());
 }
 
 tiPreferences::~tiPreferences()
@@ -86,6 +91,11 @@ void tiPreferences::on_btnSave_clicked()
 
     main_settings->setValue("paths/backupjobs", ui->leBackupjobsPath->text());
     main_settings->setValue("paths/logs", ui->leLogsPath->text());
+
+    main_settings->setValue("smtp/server", ui->leSMTPServer->text());
+    main_settings->setValue("smtp/auth", ui->cbSMTPAuth->isChecked());
+    main_settings->setValue("smtp/username", ui->leSMTPUsername->text());
+    main_settings->setValue("smtp/password", ui->leSMTPPassword->text());
 
     main_settings->sync();
 

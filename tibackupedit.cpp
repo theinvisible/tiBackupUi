@@ -106,6 +106,7 @@ void tiBackupEdit::updateJobDetails()
     ui->cbDeleteAddFilesOnDest->setChecked(currentJob->delete_add_file_on_dest);
     ui->cbBackupOnHotplug->setChecked(currentJob->start_backup_on_hotplug);
     ui->cbSaveLog->setChecked(currentJob->save_log);
+    ui->cbCompareViaChecksum->setChecked(currentJob->compare_via_checksum);
 
     // We must see if the current job disk is attached
     // Load available Backup devices
@@ -348,6 +349,7 @@ void tiBackupEdit::on_btnEditBackupJob_clicked()
     job.delete_add_file_on_dest = ui->cbDeleteAddFilesOnDest->isChecked();
     job.start_backup_on_hotplug = ui->cbBackupOnHotplug->isChecked();
     job.save_log = ui->cbSaveLog->isChecked();
+    job.compare_via_checksum = ui->cbCompareViaChecksum->isChecked();
 
     /*
     DeviceDisk selDisk;

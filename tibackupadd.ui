@@ -219,6 +219,9 @@
      <property name="title">
       <string>Backupoptionen</string>
      </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
        <layout class="QGridLayout" name="gridLayout">
@@ -242,6 +245,48 @@
            <string>Log speichern</string>
           </property>
          </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QCheckBox" name="cbCompareViaChecksum">
+          <property name="text">
+           <string>Dateiabgleich via Checksumme</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbNotify">
+     <property name="title">
+      <string>Benachrichtigung</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_5">
+      <item>
+       <layout class="QFormLayout" name="formLayout_2">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_9">
+          <property name="minimumSize">
+           <size>
+            <width>300</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>eMail-Adressen</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="leNotifyRecipients"/>
         </item>
        </layout>
       </item>

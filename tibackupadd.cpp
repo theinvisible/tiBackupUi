@@ -199,6 +199,7 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
     job.delete_add_file_on_dest = ui->cbDeleteAddFilesOnDest->isChecked();
     job.start_backup_on_hotplug = ui->cbBackupOnHotplug->isChecked();
     job.save_log = ui->cbSaveLog->isChecked();
+    job.compare_via_checksum = ui->cbCompareViaChecksum->isChecked();
 
     DeviceDisk selDisk;
     selDisk.devname = devname;
