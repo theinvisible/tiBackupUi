@@ -107,6 +107,11 @@ void tiBackupEdit::updateJobDetails()
     ui->cbBackupOnHotplug->setChecked(currentJob->start_backup_on_hotplug);
     ui->cbSaveLog->setChecked(currentJob->save_log);
     ui->cbCompareViaChecksum->setChecked(currentJob->compare_via_checksum);
+    ui->leNotifyRecipients->setText(currentJob->notifyRecipients);
+    if(currentJob->notify == true)
+    {
+        ui->gbNotify->setChecked(true);
+    }
 
     // We must see if the current job disk is attached
     // Load available Backup devices
@@ -220,7 +225,6 @@ QString tiBackupEdit::getBackupPartitionValue()
             if(ui->comboBackupPartition->itemText(ui->comboBackupPartition->currentIndex()) == editPartition)
                 return selPartition;
 
-            // TODO if currentJob disk is not attached but you change the partition, it returns the wrong value
             return editPartition;
         }
     }
@@ -350,6 +354,12 @@ void tiBackupEdit::on_btnEditBackupJob_clicked()
     job.start_backup_on_hotplug = ui->cbBackupOnHotplug->isChecked();
     job.save_log = ui->cbSaveLog->isChecked();
     job.compare_via_checksum = ui->cbCompareViaChecksum->isChecked();
+    job.notify = false;
+    if(ui->gbNotify->isChecked() == true)
+    {
+        job.notify = true;
+        job.notifyRecipients = ui->leNotifyRecipients->text();
+    }
 
     /*
     DeviceDisk selDisk;

@@ -33,7 +33,5 @@ unix {
     INCLUDEPATH += /home/rene/DEV/qtcreator/tiBackupLib
     LIBS += -L/home/rene/DEV/lib -ltiBackupLib
     QMAKE_CXXFLAGS_DEBUG += -pipe
-    QMAKE_CXXFLAGS_RELEASE += -march=native \
-        -pipe \
-        -fomit-frame-pointer
+    QMAKE_CXXFLAGS_RELEASE += -pipe -O2
 }

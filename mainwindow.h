@@ -55,6 +55,8 @@ private slots:
 
     void onActionPreferences();
 
+    void on_btnStartManualBackup_clicked();
+
 private:
     Ui::MainWindow *ui;
 

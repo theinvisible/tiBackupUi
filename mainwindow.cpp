@@ -185,7 +185,7 @@ void MainWindow::on_btnBackupJobEdit_clicked()
 
     tiConfBackupJobs jobs;
 
-    tiBackupEdit *f = new tiBackupEdit(prefWindow, jobs.gebJobByName(jobName));
+    tiBackupEdit *f = new tiBackupEdit(prefWindow, jobs.getJobByName(jobName));
     prefWindow->setCentralWidget(f);
     prefWindow->setMinimumSize(QSize(f->width(),f->height()));
     prefWindow->setMaximumSize(QSize(f->width(),f->height()));
@@ -212,4 +212,24 @@ void MainWindow::onActionPreferences()
     prefWindow->setWindowTitle(windowTitle() + QObject::trUtf8(" - Einstellungen"));
 
     prefWindow->show();
+}
+
+void MainWindow::on_btnStartManualBackup_clicked()
+{
+    QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvAvailBackupJobs->model());
+    QItemSelectionModel *selmodel = ui->tvAvailBackupJobs->selectionModel();
+    QModelIndexList sellist = selmodel->selectedRows();
+
+    if(sellist.count() < 1)
+    {
+        return;
+    }
+
+    QString jobName = model->itemFromIndex(sellist.at(0))->text();
+    tiConfBackupJobs jobss;
+
+    tiBackupJob *job = jobss.getJobByName(jobName);
+
+    // TODO Start this in own thread or GUI is blocked during backup
+    job->startBackup();
 }

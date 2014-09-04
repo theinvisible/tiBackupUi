@@ -200,6 +200,12 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
     job.start_backup_on_hotplug = ui->cbBackupOnHotplug->isChecked();
     job.save_log = ui->cbSaveLog->isChecked();
     job.compare_via_checksum = ui->cbCompareViaChecksum->isChecked();
+    job.notify = false;
+    if(ui->gbNotify->isChecked() == true)
+    {
+        job.notify = true;
+        job.notifyRecipients = ui->leNotifyRecipients->text();
+    }
 
     DeviceDisk selDisk;
     selDisk.devname = devname;
