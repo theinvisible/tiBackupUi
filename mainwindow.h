@@ -57,6 +57,8 @@ private slots:
 
     void on_btnStartManualBackup_clicked();
 
+    void ontiBackupLogChanged(const QString & path);
+
 private:
     Ui::MainWindow *ui;
 

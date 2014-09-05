@@ -49,6 +49,8 @@ private slots:
 
     void on_btnSave_clicked();
 
+    void on_cbSMTPAuth_toggled(bool checked);
+
 private:
     Ui::tiPreferences *ui;
 

@@ -28,6 +28,8 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QDebug>
 #include <QStandardItemModel>
 #include <QMessageBox>
+#include <QFileSystemWatcher>
+#include <QScrollBar>
 
 #include "ticonf.h"
 
@@ -52,6 +54,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onActionAbout()));
     connect(ui->actionAddBackupjob, SIGNAL(triggered()), this, SLOT(on_btnAddBackup_clicked()));
     connect(ui->actionPreferences, SIGNAL(triggered()), this, SLOT(onActionPreferences()));
+
+    tiConfMain main_settings;
+    QFileSystemWatcher *fileWatcher = new QFileSystemWatcher(this);
+    fileWatcher->addPath(QString("%1/tibackup.log").arg(main_settings.getValue("paths/logs").toString()));
+    connect(fileWatcher, SIGNAL(fileChanged(QString)), this, SLOT(ontiBackupLogChanged(QString)));
 
     refreshBackupJobList();
 }
@@ -232,4 +239,35 @@ void MainWindow::on_btnStartManualBackup_clicked()
 
     // TODO Start this in own thread or GUI is blocked during backup
     job->startBackup();
+}
+
+void MainWindow::ontiBackupLogChanged(const QString &path)
+{
+    // TODO We can make reading the log more efficient
+    tiConfMain main_settings;
+    QFile log(QString("%1/tibackup.log").arg(main_settings.getValue("paths/logs").toString()));
+    log.open(QIODevice::ReadOnly | QIODevice::Text);
+    log.seek((log.size()-10000));
+
+    QString loglines;
+
+    char buf[1024];
+    bool skipfirst = true;
+    while(!log.atEnd())
+    {
+        log.readLine(buf, sizeof(buf));
+        if(skipfirst == true)
+        {
+            skipfirst = false;
+            continue;
+        }
+
+        loglines.append(buf);
+    }
+
+    //QString loglines = QString::fromAscii(buf);
+
+    ui->teTibackupLog->setPlainText(loglines.trimmed());
+    QScrollBar *sb = ui->teTibackupLog->verticalScrollBar();
+    sb->setValue(sb->maximum());
 }

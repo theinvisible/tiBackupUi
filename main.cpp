@@ -23,9 +23,46 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 
 #include "mainwindow.h"
 #include <QApplication>
+#include <QFile>
+#include <QTextStream>
+#include <QDateTime>
+
+QFile *tibackupLog = 0;
+
+void logMessageOutput(QtMsgType type, const char *msg)
+{
+    if(tibackupLog == 0)
+    {
+
+        tiConfMain main_settings;
+        tibackupLog = new QFile(QString("%1/tibackup.log").arg(main_settings.getValue("paths/logs").toString()));
+        tibackupLog->open(QIODevice::Append | QIODevice::Text);
+    }
+
+    QTextStream out(tibackupLog);
+    QDateTime currentDate = QDateTime::currentDateTime();
+
+    switch (type) {
+    case QtDebugMsg:
+        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " Debug: " << msg << "\n";
+        break;
+    case QtWarningMsg:
+        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " Warning: " << msg << "\n";
+        break;
+    case QtCriticalMsg:
+        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " Critical: " << msg << "\n";
+        break;
+    case QtFatalMsg:
+        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " Fatal: " << msg << "\n";
+        abort();
+    }
+
+    tibackupLog->flush();
+}
 
 int main(int argc, char *argv[])
 {
+    qInstallMsgHandler(logMessageOutput);
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
