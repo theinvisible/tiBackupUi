@@ -30,8 +30,10 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QMessageBox>
 #include <QFileSystemWatcher>
 #include <QScrollBar>
+#include <QThread>
 
 #include "ticonf.h"
+#include "workers/tibackupjobworker.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -44,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     move((geom.width() - width()) / 2, (geom.height() - height()) / 2);
 
     QStringList headers;
-    headers << "Name" << "Backuppartition UUID" << "Hotplug Backup";
+    headers << trUtf8("Name") << trUtf8("Gerätename") << trUtf8("Backuppartition UUID");
 
     QStandardItemModel *model = new QStandardItemModel(ui->tvAvailBackupJobs);
     model->setHorizontalHeaderLabels(headers);
@@ -121,8 +123,8 @@ void MainWindow::refreshBackupJobList()
         qDebug() << "jobs found::" << job->name;
 
         item = new QStandardItem(job->name);
-        item2 = new QStandardItem(job->partition_uuid);
-        item3 = new QStandardItem((job->start_backup_on_hotplug == true) ? "ja" : "nein");
+        item2 = new QStandardItem(job->device);
+        item3 = new QStandardItem(job->partition_uuid);
 
         row = model->rowCount();
         model->setItem(row, 0, item);
@@ -233,12 +235,25 @@ void MainWindow::on_btnStartManualBackup_clicked()
     }
 
     QString jobName = model->itemFromIndex(sellist.at(0))->text();
-    tiConfBackupJobs jobss;
+    ui->btnStartManualBackup->setDisabled(true);
+    ui->statusBar->showMessage(trUtf8("Backupjob <%1> wurde gestartet und läuft...").arg(jobName));
 
-    tiBackupJob *job = jobss.getJobByName(jobName);
+    // We will do this in a seperate thread
+    //tiConfBackupJobs jobss;
+    //tiBackupJob *job = jobss.getJobByName(jobName);
+    //job->startBackup();
 
-    // TODO Start this in own thread or GUI is blocked during backup
-    job->startBackup();
+    QThread* thread = new QThread;
+    tiBackupJobWorker* worker = new tiBackupJobWorker();
+    worker->setJobName(jobName);
+    worker->moveToThread(thread);
+    //connect(worker, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
+    connect(thread, SIGNAL(started()), worker, SLOT(process()));
+    connect(worker, SIGNAL(finished()), this, SLOT(onManualBackupFinished()));
+    connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
+    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    thread->start();
 }
 
 void MainWindow::ontiBackupLogChanged(const QString &path)
@@ -270,4 +285,10 @@ void MainWindow::ontiBackupLogChanged(const QString &path)
     ui->teTibackupLog->setPlainText(loglines.trimmed());
     QScrollBar *sb = ui->teTibackupLog->verticalScrollBar();
     sb->setValue(sb->maximum());
+}
+
+void MainWindow::onManualBackupFinished()
+{
+    ui->btnStartManualBackup->setEnabled(true);
+    ui->statusBar->clearMessage();
 }

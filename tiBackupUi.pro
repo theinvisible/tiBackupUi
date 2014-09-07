@@ -16,12 +16,14 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     tibackupadd.cpp \
     tibackupedit.cpp \
-    tipreferences.cpp
+    tipreferences.cpp \
+    workers/tibackupjobworker.cpp
 
 HEADERS  += mainwindow.h \
     tibackupadd.h \
     tibackupedit.h \
-    tipreferences.h
+    tipreferences.h \
+    workers/tibackupjobworker.h
 
 FORMS    += mainwindow.ui \
     tibackupadd.ui \

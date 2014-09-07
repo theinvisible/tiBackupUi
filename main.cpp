@@ -54,6 +54,7 @@ void logMessageOutput(QtMsgType type, const char *msg)
         break;
     case QtFatalMsg:
         out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " Fatal: " << msg << "\n";
+        tibackupLog->flush();
         abort();
     }
 

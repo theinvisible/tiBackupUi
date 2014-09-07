@@ -21,49 +21,28 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 
 */
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef TIBACKUPJOBWORKER_H
+#define TIBACKUPJOBWORKER_H
 
-#include <QMainWindow>
-#include <QModelIndex>
+#include <QObject>
 
-#include "tibackupadd.h"
-#include "tibackupedit.h"
-#include "tipreferences.h"
-
-namespace Ui {
-class MainWindow;
-}
-
-class MainWindow : public QMainWindow
+class tiBackupJobWorker : public QObject
 {
     Q_OBJECT
-
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    explicit tiBackupJobWorker(QObject *parent = 0);
+    void setJobName(const QString &name);
 
-private slots:
-    void on_btnAddBackup_clicked();
-    void onjobAdded(tiBackupJob job);
-    void onjobEdited(tiBackupJob job);
+signals:
+    void finished();
+    void error(QString err);
 
-    void onActionAbout();
-    void on_btnBackupJobDelete_clicked();
-    void on_btnBackupJobEdit_clicked();
-    void on_tvAvailBackupJobs_doubleClicked(const QModelIndex &index);
-
-    void onActionPreferences();
-
-    void on_btnStartManualBackup_clicked();
-
-    void ontiBackupLogChanged(const QString & path);
-    void onManualBackupFinished();
+public slots:
+    void process();
 
 private:
-    Ui::MainWindow *ui;
+    QString jobname;
 
-    void refreshBackupJobList();
 };
 
-#endif // MAINWINDOW_H
+#endif // TIBACKUPJOBWORKER_H
