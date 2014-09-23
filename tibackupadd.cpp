@@ -28,6 +28,10 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QFileDialog>
 #include <QStandardItemModel>
 #include <QMessageBox>
+#include <QMainWindow>
+#include <QDateTime>
+
+#include "tools/scripteditor.h"
 
 tiBackupAdd::tiBackupAdd(QWidget *parent) :
     QWidget(parent),
@@ -206,6 +210,7 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
         job.notify = true;
         job.notifyRecipients = ui->leNotifyRecipients->text();
     }
+    job.scriptBeforeBackup = ui->leScriptPathBeforeBackup->text();
 
     DeviceDisk selDisk;
     selDisk.devname = devname;
@@ -303,4 +308,32 @@ void tiBackupAdd::updatePartitionInformation()
 void tiBackupAdd::on_btnCancel_clicked()
 {
     parentWidget()->close();
+}
+
+void tiBackupAdd::on_btnEditScriptBeforeBackup_clicked()
+{
+    QMainWindow *winScriptEditor = new QMainWindow(this, Qt::Dialog);
+    winScriptEditor->setWindowModality(Qt::WindowModal);
+    winScriptEditor->setAttribute(Qt::WA_DeleteOnClose, true);
+    QString path = ui->leScriptPathBeforeBackup->text();
+    tiConfMain main_settings;
+
+    if(path.isEmpty())
+    {
+        QDateTime currentDate = QDateTime::currentDateTime();
+        path = QString("%1/%2_beforebackup.sh").arg(main_settings.getValue("paths/scripts").toString(), currentDate.toString("yyyyMMddhhmmss"));
+        ui->leScriptPathBeforeBackup->setText(path);
+    }
+
+    //tiPreferences *f = new tiPreferences(winScriptEditor);
+    scriptEditor *e = new scriptEditor(winScriptEditor);
+    e->loadScript(path);
+    winScriptEditor->setCentralWidget(e);
+    winScriptEditor->setMinimumSize(QSize(e->width(),e->height()));
+    winScriptEditor->setMaximumSize(QSize(e->width(),e->height()));
+    winScriptEditor->setWindowTitle(windowTitle() + QObject::trUtf8(" - Script Editor"));
+
+    winScriptEditor->show();
+
+    qDebug() << "tiBackupAdd::on_btnEditScriptBeforeBackup_clicked(): test test";
 }

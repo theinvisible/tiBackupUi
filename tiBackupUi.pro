@@ -17,18 +17,21 @@ SOURCES += main.cpp\
     tibackupadd.cpp \
     tibackupedit.cpp \
     tipreferences.cpp \
-    workers/tibackupjobworker.cpp
+    workers/tibackupjobworker.cpp \
+    tools/scripteditor.cpp
 
 HEADERS  += mainwindow.h \
     tibackupadd.h \
     tibackupedit.h \
     tipreferences.h \
-    workers/tibackupjobworker.h
+    workers/tibackupjobworker.h \
+    tools/scripteditor.h
 
 FORMS    += mainwindow.ui \
     tibackupadd.ui \
     tibackupedit.ui \
-    tipreferences.ui
+    tipreferences.ui \
+    tools/scripteditor.ui
 
 unix {
     message(Building for Unix)

@@ -38,6 +38,7 @@ tiPreferences::tiPreferences(QWidget *parent) :
 
     ui->leBackupjobsPath->setText(main_settings->getValue("paths/backupjobs").toString());
     ui->leLogsPath->setText(main_settings->getValue("paths/logs").toString());
+    ui->leBackupScriptsPath->setText(main_settings->getValue("paths/scripts").toString());
 
     ui->leSMTPServer->setText(main_settings->getValue("smtp/server").toString());
     ui->cbSMTPAuth->setChecked(main_settings->getValue("smtp/auth").toBool());
@@ -70,7 +71,7 @@ void tiPreferences::on_btnBackupjobs_clicked()
 {
     QString startDir = (ui->leBackupjobsPath->text().isEmpty()) ? "/" : ui->leBackupjobsPath->text();
 
-    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wählen ein Verzeichnis"),
+    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wähle ein Verzeichnis"),
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
@@ -85,7 +86,7 @@ void tiPreferences::on_btnLogs_clicked()
 {
     QString startDir = (ui->leLogsPath->text().isEmpty()) ? "/" : ui->leLogsPath->text();
 
-    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wählen ein Verzeichnis"),
+    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wähle ein Verzeichnis"),
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
@@ -102,6 +103,7 @@ void tiPreferences::on_btnSave_clicked()
 
     main_settings->setValue("paths/backupjobs", ui->leBackupjobsPath->text());
     main_settings->setValue("paths/logs", ui->leLogsPath->text());
+    main_settings->setValue("paths/scripts", ui->leBackupScriptsPath->text());
 
     main_settings->setValue("smtp/server", ui->leSMTPServer->text());
     main_settings->setValue("smtp/auth", ui->cbSMTPAuth->isChecked());
@@ -125,4 +127,19 @@ void tiPreferences::on_cbSMTPAuth_toggled(bool checked)
         ui->leSMTPUsername->setDisabled(true);
         ui->leSMTPPassword->setDisabled(true);
     }
+}
+
+void tiPreferences::on_btnBackupjobScripts_clicked()
+{
+    QString startDir = (ui->leBackupScriptsPath->text().isEmpty()) ? "/" : ui->leBackupScriptsPath->text();
+
+    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wähle ein Verzeichnis"),
+                                                    startDir,
+                                                    QFileDialog::ShowDirsOnly
+                                                    | QFileDialog::DontResolveSymlinks);
+
+    if(dir.isEmpty())
+        return;
+
+    ui->leBackupScriptsPath->setText(dir);
 }

@@ -21,57 +21,34 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 
 */
 
-#ifndef TIBACKUPADD_H
-#define TIBACKUPADD_H
+#ifndef SCRIPTEDITOR_H
+#define SCRIPTEDITOR_H
 
 #include <QWidget>
 
-#include "ticonf.h"
-#include "tibackuplib.h"
-
 namespace Ui {
-class tiBackupAdd;
+class scriptEditor;
 }
 
-class tiBackupAdd : public QWidget
+class scriptEditor : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit tiBackupAdd(QWidget *parent = 0);
-    ~tiBackupAdd();
+    explicit scriptEditor(QWidget *parent = 0);
+    ~scriptEditor();
+
+    void loadScript(const QString &scriptPath);
 
 private slots:
-    void on_comboBackupDevice_currentIndexChanged(int index);
+    void on_btnSave_clicked();
 
-    void on_comboBackupPartition_currentIndexChanged(int index);
+    void on_btnAbort_clicked();
 
-    void on_btnSelectSource_clicked();
-
-    void on_btnSelectDest_clicked();
-
-    void on_btnAddBackupFolder_clicked();
-
-    void on_btnRemoveBackupFolder_clicked();
-
-    void on_btnAddBackupJob_clicked();
-
-    void on_btnPartitionMount_clicked();
-
-    void on_btnCancel_clicked();
-
-    void on_btnEditScriptBeforeBackup_clicked();
-
-signals:
-    void jobAdded(tiBackupJob job);
+    void on_btnScriptFileChoose_clicked();
 
 private:
-    Ui::tiBackupAdd *ui;
-
-    void updatePartitionInformation();
-
-protected:
-    bool eventFilter(QObject *object, QEvent *event);
+    Ui::scriptEditor *ui;
 };
 
-#endif // TIBACKUPADD_H
+#endif // SCRIPTEDITOR_H
