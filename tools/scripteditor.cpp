@@ -62,6 +62,8 @@ void scriptEditor::on_btnSave_clicked()
     out << ui->teScriptSource->toPlainText();
     scriptFile.close();
     parentWidget()->close();
+
+    emit scriptSaved(ui->leScriptPath->text());
 }
 
 void scriptEditor::on_btnAbort_clicked()

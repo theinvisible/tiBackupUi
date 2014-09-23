@@ -47,6 +47,9 @@ private slots:
 
     void on_btnScriptFileChoose_clicked();
 
+signals:
+    void scriptSaved(QString filePath);
+
 private:
     Ui::scriptEditor *ui;
 };

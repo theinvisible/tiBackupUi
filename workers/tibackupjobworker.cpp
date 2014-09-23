@@ -23,6 +23,8 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 
 #include "tibackupjobworker.h"
 
+#include <QDebug>
+
 #include "ticonf.h"
 
 tiBackupJobWorker::tiBackupJobWorker(QObject *parent) :
@@ -43,6 +45,8 @@ void tiBackupJobWorker::process()
         emit finished();
         return;
     }
+
+    qDebug() << "tiBackupJobWorker::process(): " << jobname;
 
     tiConfBackupJobs jobss;
     tiBackupJob *workerJob = new tiBackupJob();

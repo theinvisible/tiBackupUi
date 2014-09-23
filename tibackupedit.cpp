@@ -28,6 +28,10 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QFileDialog>
 #include <QStandardItemModel>
 #include <QMessageBox>
+#include <QMainWindow>
+#include <QDateTime>
+
+#include "tools/scripteditor.h"
 
 tiBackupEdit::tiBackupEdit(QWidget *parent, tiBackupJob *job) :
     QWidget(parent),
@@ -112,6 +116,7 @@ void tiBackupEdit::updateJobDetails()
     {
         ui->gbNotify->setChecked(true);
     }
+    ui->leScriptPathBeforeBackup->setText(currentJob->scriptBeforeBackup);
 
     // We must see if the current job disk is attached
     // Load available Backup devices
@@ -360,6 +365,7 @@ void tiBackupEdit::on_btnEditBackupJob_clicked()
         job.notify = true;
         job.notifyRecipients = ui->leNotifyRecipients->text();
     }
+    job.scriptBeforeBackup = ui->leScriptPathBeforeBackup->text();
 
     /*
     DeviceDisk selDisk;
@@ -446,4 +452,38 @@ void tiBackupEdit::on_btnPartitionMount_clicked()
 void tiBackupEdit::on_comboBackupPartition_activated(int index)
 {
     updatePartitionInformation();
+}
+
+void tiBackupEdit::on_btnEditScriptBeforeBackup_clicked()
+{
+    QMainWindow *winScriptEditor = new QMainWindow(this, Qt::Dialog);
+    winScriptEditor->setWindowModality(Qt::WindowModal);
+    winScriptEditor->setAttribute(Qt::WA_DeleteOnClose, true);
+    QString path = ui->leScriptPathBeforeBackup->text();
+    tiConfMain main_settings;
+
+    if(path.isEmpty())
+    {
+        QDateTime currentDate = QDateTime::currentDateTime();
+        path = QString("%1/%2_beforebackup.sh").arg(main_settings.getValue("paths/scripts").toString(), currentDate.toString("yyyyMMddhhmmss"));
+        //ui->leScriptPathBeforeBackup->setText(path);
+    }
+
+    //tiPreferences *f = new tiPreferences(winScriptEditor);
+    scriptEditor *e = new scriptEditor(winScriptEditor);
+    e->loadScript(path);
+    QObject::connect(e, SIGNAL(scriptSaved(QString)), this, SLOT(on_scriptBefore_changed(QString)));
+    winScriptEditor->setCentralWidget(e);
+    winScriptEditor->setMinimumSize(QSize(e->width(),e->height()));
+    winScriptEditor->setMaximumSize(QSize(e->width(),e->height()));
+    winScriptEditor->setWindowTitle(windowTitle() + QObject::trUtf8(" - Script Editor"));
+
+    winScriptEditor->show();
+
+    qDebug() << "tiBackupAdd::on_btnEditScriptBeforeBackup_clicked(): test test";
+}
+
+void tiBackupEdit::on_scriptBefore_changed(QString scriptPath)
+{
+    ui->leScriptPathBeforeBackup->setText(scriptPath);
 }

@@ -322,12 +322,13 @@ void tiBackupAdd::on_btnEditScriptBeforeBackup_clicked()
     {
         QDateTime currentDate = QDateTime::currentDateTime();
         path = QString("%1/%2_beforebackup.sh").arg(main_settings.getValue("paths/scripts").toString(), currentDate.toString("yyyyMMddhhmmss"));
-        ui->leScriptPathBeforeBackup->setText(path);
+        //ui->leScriptPathBeforeBackup->setText(path);
     }
 
     //tiPreferences *f = new tiPreferences(winScriptEditor);
     scriptEditor *e = new scriptEditor(winScriptEditor);
     e->loadScript(path);
+    QObject::connect(e, SIGNAL(scriptSaved(QString)), this, SLOT(on_scriptBefore_changed(QString)));
     winScriptEditor->setCentralWidget(e);
     winScriptEditor->setMinimumSize(QSize(e->width(),e->height()));
     winScriptEditor->setMaximumSize(QSize(e->width(),e->height()));
@@ -336,4 +337,9 @@ void tiBackupAdd::on_btnEditScriptBeforeBackup_clicked()
     winScriptEditor->show();
 
     qDebug() << "tiBackupAdd::on_btnEditScriptBeforeBackup_clicked(): test test";
+}
+
+void tiBackupAdd::on_scriptBefore_changed(QString scriptPath)
+{
+    ui->leScriptPathBeforeBackup->setText(scriptPath);
 }
