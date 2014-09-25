@@ -44,16 +44,16 @@ void logMessageOutput(QtMsgType type, const char *msg)
 
     switch (type) {
     case QtDebugMsg:
-        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " Debug: " << msg << "\n";
+        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Debug: " << msg << "\n";
         break;
     case QtWarningMsg:
-        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " Warning: " << msg << "\n";
+        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Warning: " << msg << "\n";
         break;
     case QtCriticalMsg:
-        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " Critical: " << msg << "\n";
+        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Critical: " << msg << "\n";
         break;
     case QtFatalMsg:
-        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " Fatal: " << msg << "\n";
+        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Fatal: " << msg << "\n";
         tibackupLog->flush();
         abort();
     }

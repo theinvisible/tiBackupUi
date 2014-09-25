@@ -475,7 +475,7 @@ void tiBackupEdit::on_btnEditScriptBeforeBackup_clicked()
     QObject::connect(e, SIGNAL(scriptSaved(QString)), this, SLOT(on_scriptBefore_changed(QString)));
     winScriptEditor->setCentralWidget(e);
     winScriptEditor->setMinimumSize(QSize(e->width(),e->height()));
-    winScriptEditor->setMaximumSize(QSize(e->width(),e->height()));
+    //winScriptEditor->setMaximumSize(QSize(e->width(),e->height()));
     winScriptEditor->setWindowTitle(windowTitle() + QObject::trUtf8(" - Script Editor"));
 
     winScriptEditor->show();
