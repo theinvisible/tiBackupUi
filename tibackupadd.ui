@@ -420,6 +420,13 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
+      <widget class="QPushButton" name="btnCancel">
+       <property name="text">
+        <string>Abbrechen</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -433,16 +440,9 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btnCancel">
-       <property name="text">
-        <string>Abbrechen</string>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QPushButton" name="btnAddBackupJob">
        <property name="text">
-        <string>Backupjob hinzufügen</string>
+        <string>Backupjob speichern</string>
        </property>
       </widget>
      </item>
