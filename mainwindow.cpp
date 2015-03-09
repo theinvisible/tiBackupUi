@@ -32,6 +32,7 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QScrollBar>
 #include <QThread>
 
+#include "config.h"
 #include "ticonf.h"
 #include "workers/tibackupjobworker.h"
 
@@ -97,10 +98,11 @@ void MainWindow::onjobEdited(tiBackupJob job)
 
 void MainWindow::onActionAbout()
 {
-    QMessageBox::about(this, trUtf8("Über tiBackup"), trUtf8("Entwickelt von: <p> <b>Rene Hadler</b> <br>"
+    QMessageBox::about(this, trUtf8("Über tiBackup"), trUtf8("<b>tiBackup %1</b> <br><br>"
+                                                             "Entwickelt von: <b>Rene Hadler</b> <br>"
                                                              "eMail: <a href=mailto:'rene@hadler.me'>rene@hadler.me</a> <br>"
                                                              "Website: <a href=https://hadler.me>https://hadler.me</a></p>"
-                                                             "<p>libs...</p>"));
+                                                             "<p>libs...</p>").arg(tibackup_config::version));
 }
 
 void MainWindow::refreshBackupJobList()
