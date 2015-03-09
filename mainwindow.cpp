@@ -122,7 +122,7 @@ void MainWindow::refreshBackupJobList()
     for(int i=0; i < jobs.count(); i++)
     {
         tiBackupJob *job = jobs.at(i);
-        qDebug() << "jobs found::" << job->name;
+        qDebug() << "MainWindow::refreshBackupJobList() -> jobs found::" << job->name;
 
         item = new QStandardItem(job->name);
         item2 = new QStandardItem(job->device);
@@ -152,7 +152,7 @@ void MainWindow::on_btnBackupJobDelete_clicked()
     QString jobName = model->itemFromIndex(sellist.at(0))->text();
     //ui->tvBackupFolders->selectedItems();
 
-    qDebug() << "remove backupjob with name::" << jobName;
+    qDebug() << "MainWindow::on_btnBackupJobDelete_clicked() -> remove backupjob with name::" << jobName;
 
     int ret = QMessageBox::warning(this, QString::fromUtf8("Backupjob löschen"),
                                 QString::fromUtf8("Achtung, der gewählte Job wird unwiderruflich gelöscht, fortfahren?"),

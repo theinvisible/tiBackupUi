@@ -56,13 +56,13 @@ tiBackupEdit::tiBackupEdit(QWidget *parent, tiBackupJob *job) :
     // Load available Backup devices
     TiBackupLib blib;
     QList<DeviceDisk> disks = blib.getAttachedDisks();
-    qDebug() << "disks found:" << disks.count();
+    qDebug() << "tiBackupEdit::tiBackupEdit() -> disks found:" << disks.count();
 
     for(int i=0; i < disks.count(); i++)
     {
         DeviceDisk disk = disks.at(i);
 
-        qDebug() << "disk:" << disk.devname;
+        qDebug() << "tiBackupEdit::tiBackupEdit() -> disk:" << disk.devname;
         if(disk.devtype == "disk")
         {
             ui->comboBackupDevice->insertItem(0, QString("%1 - %2 (%3)").arg(disk.vendor, disk.model, disk.devname), disk.devname);
@@ -127,7 +127,7 @@ void tiBackupEdit::updateJobDetails()
     {
         DeviceDisk disk = disks.at(i);
 
-        qDebug() << "disk:" << disk.devname;
+        qDebug() << "tiBackupEdit::updateJobDetails() -> disk:" << disk.devname;
         if(disk.devtype == "disk")
         {
             disk.readPartitions();
@@ -141,11 +141,11 @@ void tiBackupEdit::updateJobDetails()
                 if(part.uuid == currentJob->partition_uuid)
                 {
                     // Job disk is attached right now
-                    qDebug() << "job disk is attached right now";
+                    qDebug() << "tiBackupEdit::updateJobDetails() -> job disk is attached right now";
 
                     int devrow = ui->comboBackupDevice->findData(disk.devname);
                     int partrow = ui->comboBackupPartition->findData(part.uuid);
-                    qDebug() << "devrow::" << devrow << "::partrow::" << partrow;
+                    qDebug() << "tiBackupEdit::updateJobDetails() -> devrow::" << devrow << "::partrow::" << partrow;
 
                     ui->comboBackupDevice->setCurrentIndex(devrow);
                     ui->comboBackupPartition->setCurrentIndex(partrow);
@@ -190,7 +190,7 @@ QString tiBackupEdit::getBackupDeviceValue()
     QString selDevname = ui->comboBackupDevice->itemText(ui->comboBackupDevice->currentIndex());
     QString editDevname = ui->comboBackupDevice->currentText();
 
-    qDebug() << "selDev::" << selDevname << "::editDev::" << editDevname << "::";
+    qDebug() << "tiBackupEdit::getBackupDeviceValue() -> selDev::" << selDevname << "::editDev::" << editDevname << "::";
 
     if(currentJobDiskisAttached == true)
     {
@@ -214,7 +214,7 @@ QString tiBackupEdit::getBackupPartitionValue()
     QString selPartition = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
     QString editPartition = ui->comboBackupPartition->currentText();
 
-    qDebug() << "selPart::" << selPartition << "::editPart::" << editPartition << "::";
+    qDebug() << "tiBackupEdit::getBackupPartitionValue() -> selPart::" << selPartition << "::editPart::" << editPartition << "::";
 
     if(currentJobDiskisAttached == true)
     {
@@ -303,8 +303,6 @@ void tiBackupEdit::on_btnAddBackupFolder_clicked()
     int row = model->rowCount();
     model->setItem(row, 0, item);
     model->setItem(row, 1, item2);
-
-    qDebug() << "rowcount::" << model->rowCount();
 }
 
 void tiBackupEdit::on_btnRemoveBackupFolder_clicked()
@@ -328,8 +326,8 @@ void tiBackupEdit::on_btnCancel_clicked()
 
 void tiBackupEdit::on_btnEditBackupJob_clicked()
 {
-    qDebug() << "BackupDeviceValue::" << getBackupDeviceValue();
-    qDebug() << "BackupPartitionValue::" << getBackupPartitionValue();
+    qDebug() << "tiBackupEdit::on_btnEditBackupJob_clicked() -> BackupDeviceValue::" << getBackupDeviceValue();
+    qDebug() << "tiBackupEdit::on_btnEditBackupJob_clicked() -> BackupPartitionValue::" << getBackupPartitionValue();
 
     //QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
     QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvBackupFolders->model());
@@ -409,7 +407,7 @@ void tiBackupEdit::on_comboBackupDevice_currentIndexChanged(int index)
     QString devname = ui->comboBackupDevice->itemData(index).toString();
     ui->comboBackupPartition->clear();
 
-    qDebug() << "tiBackupEdit::on_comboBackupDevice_currentIndexChanged(int index) devname:" << devname;
+    qDebug() << "tiBackupEdit::on_comboBackupDevice_currentIndexChanged() -> devname" << devname;
     DeviceDisk selDisk;
     selDisk.devname = devname;
     selDisk.readPartitions();
@@ -433,7 +431,7 @@ void tiBackupEdit::on_btnPartitionMount_clicked()
 {
     QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
     QString uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
-    qDebug() << "selected part uuid:" << uuid;
+    qDebug() << "tiBackupEdit::on_btnPartitionMount_clicked() -> selected part uuid:" << uuid;
     DeviceDisk selDisk;
     selDisk.devname = devname;
 
@@ -482,7 +480,7 @@ void tiBackupEdit::on_btnEditScriptBeforeBackup_clicked()
 
     winScriptEditor->show();
 
-    qDebug() << "tiBackupAdd::on_btnEditScriptBeforeBackup_clicked(): test test";
+    qDebug() << "tiBackupAdd::on_btnEditScriptBeforeBackup_clicked() -> test test";
 }
 
 void tiBackupEdit::on_scriptBefore_changed(QString scriptPath)
@@ -516,7 +514,7 @@ void tiBackupEdit::on_btnEditScriptAfterBackup_clicked()
 
     winScriptEditor->show();
 
-    qDebug() << "tiBackupAdd::on_btnEditScriptAfterBackup_clicked(): test test";
+    qDebug() << "tiBackupAdd::on_btnEditScriptAfterBackup_clicked() -> test test";
 }
 
 void tiBackupEdit::on_scriptAfter_changed(QString scriptPath)

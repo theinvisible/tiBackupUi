@@ -45,33 +45,18 @@ tiBackupAdd::tiBackupAdd(QWidget *parent) :
     // Load available Backup devices
     TiBackupLib blib;
     QList<DeviceDisk> disks = blib.getAttachedDisks();
-    qDebug() << "disks found:" << disks.count();
+    qDebug() << "tiBackupAdd::tiBackupAdd() -> disks found:" << disks.count();
 
     for(i=0; i < disks.count(); i++)
     {
         DeviceDisk disk = disks.at(i);
 
-        qDebug() << "disk:" << disk.devname;
+        qDebug() << "tiBackupAdd::tiBackupAdd() -> disk:" << disk.devname;
         if(disk.devtype == "disk")
         {
             ui->comboBackupDevice->insertItem(0, QString("%1 - %2 (%3)").arg(disk.vendor, disk.model, disk.devname), disk.devname);
         }
     }
-
-    // Load available Backup partitions
-    /*
-    QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
-
-    qDebug() << "selected dev:" << devname;
-    DeviceDisk selDisk;
-    selDisk.devname = devname;
-    selDisk.readPartitions();
-    for(i=0; i < selDisk.partitions.count(); i++)
-    {
-        DeviceDiskPartition part = selDisk.partitions.at(i);
-        ui->comboBackupPartition->insertItem(0, QString("%1 (%2)").arg(part.name, part.uuid));
-    }
-    */
 
     parent->installEventFilter(this);
 
@@ -96,7 +81,7 @@ void tiBackupAdd::on_comboBackupDevice_currentIndexChanged(int index)
     QString devname = ui->comboBackupDevice->itemData(index).toString();
     ui->comboBackupPartition->clear();
 
-    qDebug() << "selected dev2:" << devname;
+    qDebug() << "tiBackupAdd::on_comboBackupDevice_currentIndexChanged() -> selected dev2:" << devname;
     DeviceDisk selDisk;
     selDisk.devname = devname;
     selDisk.readPartitions();
@@ -134,7 +119,7 @@ void tiBackupAdd::on_btnSelectDest_clicked()
     QString uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
     QString defaultPath = "/";
 
-    qDebug() << "selected part uuid:" << uuid;
+    qDebug() << "tiBackupAdd::on_btnSelectDest_clicked() -> selected part uuid:" << uuid;
     DeviceDisk selDisk;
     selDisk.devname = devname;
 
@@ -154,7 +139,7 @@ void tiBackupAdd::on_btnSelectDest_clicked()
 
     ui->leDestFolder->setText(dir);
 
-    qDebug() << "generic name::" << TiBackupLib::convertPath2Generic(dir, lib.getMountDir(part.name));
+    qDebug() << "tiBackupAdd::on_btnSelectDest_clicked() -> generic name::" << TiBackupLib::convertPath2Generic(dir, lib.getMountDir(part.name));
 }
 
 void tiBackupAdd::on_btnAddBackupFolder_clicked()
@@ -168,7 +153,7 @@ void tiBackupAdd::on_btnAddBackupFolder_clicked()
     model->setItem(row, 0, item);
     model->setItem(row, 1, item2);
 
-    qDebug() << "rowcount::" << model->rowCount();
+    qDebug() << "tiBackupAdd::on_btnAddBackupFolder_clicked() -> rowcount::" << model->rowCount();
 }
 
 void tiBackupAdd::on_btnRemoveBackupFolder_clicked()
@@ -264,7 +249,7 @@ void tiBackupAdd::on_btnPartitionMount_clicked()
 {
     QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
     QString uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
-    qDebug() << "selected part uuid:" << uuid;
+    qDebug() << "tiBackupAdd::on_btnPartitionMount_clicked() -> selected part uuid:" << uuid;
     DeviceDisk selDisk;
     selDisk.devname = devname;
 
@@ -286,7 +271,7 @@ void tiBackupAdd::updatePartitionInformation()
 {
     QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
     QString uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
-    qDebug() << "selected part uuid:" << uuid;
+    qDebug() << "tiBackupAdd::updatePartitionInformation() -> selected part uuid:" << uuid;
     DeviceDisk selDisk;
     selDisk.devname = devname;
 
@@ -336,8 +321,6 @@ void tiBackupAdd::on_btnEditScriptBeforeBackup_clicked()
     winScriptEditor->setWindowTitle(windowTitle() + QObject::trUtf8(" - Script Editor"));
 
     winScriptEditor->show();
-
-    qDebug() << "tiBackupAdd::on_btnEditScriptBeforeBackup_clicked(): test test";
 }
 
 void tiBackupAdd::on_scriptBefore_changed(QString scriptPath)
@@ -370,8 +353,6 @@ void tiBackupAdd::on_btnEditScriptAfterBackup_clicked()
     winScriptEditor->setWindowTitle(windowTitle() + QObject::trUtf8(" - Script Editor"));
 
     winScriptEditor->show();
-
-    qDebug() << "tiBackupAdd::on_btnEditScriptAfterBackup_clicked(): test test";
 }
 
 void tiBackupAdd::on_scriptAfter_changed(QString scriptPath)
