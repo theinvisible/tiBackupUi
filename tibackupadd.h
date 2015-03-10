@@ -53,10 +53,10 @@ private slots:
     void on_btnCancel_clicked();
 
     void on_btnEditScriptBeforeBackup_clicked();
-    void on_scriptBefore_changed(QString scriptPath);
+    void onScriptBeforeChanged(QString scriptPath);
 
     void on_btnEditScriptAfterBackup_clicked();
-    void on_scriptAfter_changed(QString scriptPath);
+    void onScriptAfterChanged(QString scriptPath);
 
 signals:
     void jobAdded(tiBackupJob job);

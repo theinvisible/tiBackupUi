@@ -54,10 +54,10 @@ private slots:
     void on_comboBackupPartition_activated(int index);
 
     void on_btnEditScriptBeforeBackup_clicked();
-    void on_scriptBefore_changed(QString scriptPath);
+    void onScriptBeforeCchanged(QString scriptPath);
 
     void on_btnEditScriptAfterBackup_clicked();
-    void on_scriptAfter_changed(QString scriptPath);
+    void onScriptAfterChanged(QString scriptPath);
 
 signals:
     void jobEdited(tiBackupJob job);
