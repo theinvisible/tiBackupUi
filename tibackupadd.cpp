@@ -335,7 +335,7 @@ void tiBackupAdd::on_btnEditScriptBeforeBackup_clicked()
     //tiPreferences *f = new tiPreferences(winScriptEditor);
     scriptEditor *e = new scriptEditor(winScriptEditor);
     e->loadScript(path);
-    QObject::connect(e, SIGNAL(scriptSaved(QString)), this, SLOT(on_scriptBefore_changed(QString)));
+    QObject::connect(e, SIGNAL(scriptSaved(QString)), this, SLOT(onScriptBeforeChanged(QString)));
     winScriptEditor->setCentralWidget(e);
     winScriptEditor->setMinimumSize(QSize(e->width(),e->height()));
     //winScriptEditor->setMaximumSize(QSize(e->width(),e->height()));
@@ -344,7 +344,7 @@ void tiBackupAdd::on_btnEditScriptBeforeBackup_clicked()
     winScriptEditor->show();
 }
 
-void tiBackupAdd::on_scriptBefore_changed(QString scriptPath)
+void tiBackupAdd::onScriptBeforeChanged(QString scriptPath)
 {
     ui->leScriptPathBeforeBackup->setText(scriptPath);
 }
@@ -367,7 +367,7 @@ void tiBackupAdd::on_btnEditScriptAfterBackup_clicked()
     //tiPreferences *f = new tiPreferences(winScriptEditor);
     scriptEditor *e = new scriptEditor(winScriptEditor);
     e->loadScript(path);
-    QObject::connect(e, SIGNAL(scriptSaved(QString)), this, SLOT(on_scriptAfter_changed(QString)));
+    QObject::connect(e, SIGNAL(scriptSaved(QString)), this, SLOT(onScriptAfterChanged(QString)));
     winScriptEditor->setCentralWidget(e);
     winScriptEditor->setMinimumSize(QSize(e->width(),e->height()));
     //winScriptEditor->setMaximumSize(QSize(e->width(),e->height()));
@@ -376,7 +376,7 @@ void tiBackupAdd::on_btnEditScriptAfterBackup_clicked()
     winScriptEditor->show();
 }
 
-void tiBackupAdd::on_scriptAfter_changed(QString scriptPath)
+void tiBackupAdd::onScriptAfterChanged(QString scriptPath)
 {
     ui->leScriptPathAfterBackup->setText(scriptPath);
 }
