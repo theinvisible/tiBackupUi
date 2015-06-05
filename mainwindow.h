@@ -26,6 +26,7 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 
 #include <QMainWindow>
 #include <QModelIndex>
+#include <QLabel>
 
 #include "tibackupadd.h"
 #include "tibackupedit.h"
@@ -60,8 +61,11 @@ private slots:
     void ontiBackupLogChanged(const QString & path);
     void onManualBackupFinished();
 
+    void onTimeUpdate();
+
 private:
     Ui::MainWindow *ui;
+    QLabel *lblTime;
 
     void refreshBackupJobList();
 };

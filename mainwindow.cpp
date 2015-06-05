@@ -31,6 +31,8 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QFileSystemWatcher>
 #include <QScrollBar>
 #include <QThread>
+#include <QTimer>
+#include <QDateTime>
 
 #include "config.h"
 #include "ticonf.h"
@@ -62,6 +64,15 @@ MainWindow::MainWindow(QWidget *parent) :
     QFileSystemWatcher *fileWatcher = new QFileSystemWatcher(this);
     fileWatcher->addPath(QString("%1/tibackup.log").arg(main_settings.getValue("paths/logs").toString()));
     connect(fileWatcher, SIGNAL(fileChanged(QString)), this, SLOT(ontiBackupLogChanged(QString)));
+
+    lblTime = new QLabel(this);
+    ui->statusBar->addPermanentWidget(lblTime);
+    onTimeUpdate();
+
+    // We start a timer for our clock
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(onTimeUpdate()));
+    timer->start(1000);
 
     refreshBackupJobList();
 }
@@ -293,4 +304,10 @@ void MainWindow::onManualBackupFinished()
 {
     ui->btnStartManualBackup->setEnabled(true);
     ui->statusBar->clearMessage();
+}
+
+void MainWindow::onTimeUpdate()
+{
+    QDateTime curDate = QDateTime::currentDateTime();
+    lblTime->setText(curDate.toString("dd.MM.yyyy hh:mm:ss"));
 }
