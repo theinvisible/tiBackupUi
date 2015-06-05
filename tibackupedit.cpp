@@ -119,6 +119,29 @@ void tiBackupEdit::updateJobDetails()
     ui->leScriptPathBeforeBackup->setText(currentJob->scriptBeforeBackup);
     ui->leScriptPathAfterBackup->setText(currentJob->scriptAfterBackup);
 
+    // Set defined task if any
+    switch(currentJob->intervalType)
+    {
+    case tiBackupJobIntervalNONE:
+        break;
+    case tiBackupJobIntervalDAILY:
+    {
+        ui->cbInterval->setCurrentIndex(static_cast<int>(currentJob->intervalType));
+        ui->teDailyTime->setDateTime(QDateTime::fromString(currentJob->intervalTime, "hh:mm"));
+        break;
+    }
+    case tiBackupJobIntervalWEEKLY:
+        ui->cbInterval->setCurrentIndex(static_cast<int>(currentJob->intervalType));
+        ui->teWeeklyTime->setDateTime(QDateTime::fromString(currentJob->intervalTime, "hh:mm"));
+        ui->cbWeeklyDay->setCurrentIndex(currentJob->intervalDay);
+        break;
+    case tiBackupJobIntervalMONTHLY:
+        ui->cbInterval->setCurrentIndex(static_cast<int>(currentJob->intervalType));
+        ui->teMonthlyTime->setDateTime(QDateTime::fromString(currentJob->intervalTime, "hh:mm"));
+        ui->sbMonthlyDay->setValue(currentJob->intervalDay);
+        break;
+    }
+
     // We must see if the current job disk is attached
     // Load available Backup devices
     TiBackupLib blib;
@@ -393,6 +416,27 @@ void tiBackupEdit::on_btnEditBackupJob_clicked()
         h.insertMulti(model->item(i, 0)->text(), dest);
     }
     job.backupdirs = h;
+
+    // Set task values
+    job.intervalType = static_cast<tiBackupJobInterval>(ui->cbInterval->currentIndex());
+    job.intervalTime = "0";
+    job.intervalDay = 0;
+    switch(job.intervalType)
+    {
+    case tiBackupJobIntervalNONE:
+        break;
+    case tiBackupJobIntervalDAILY:
+        job.intervalTime = ui->teDailyTime->text();
+        break;
+    case tiBackupJobIntervalWEEKLY:
+        job.intervalTime = ui->teWeeklyTime->text();
+        job.intervalDay = ui->cbWeeklyDay->currentIndex();
+        break;
+    case tiBackupJobIntervalMONTHLY:
+        job.intervalTime = ui->teMonthlyTime->text();
+        job.intervalDay = ui->sbMonthlyDay->value();
+        break;
+    }
 
     jobs.saveBackupJob(job);
 

@@ -211,6 +211,27 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
     }
     job.backupdirs = h;
 
+    // Set task values
+    job.intervalType = static_cast<tiBackupJobInterval>(ui->cbInterval->currentIndex());
+    job.intervalTime = "0";
+    job.intervalDay = 0;
+    switch(job.intervalType)
+    {
+    case tiBackupJobIntervalNONE:
+        break;
+    case tiBackupJobIntervalDAILY:
+        job.intervalTime = ui->teDailyTime->text();
+        break;
+    case tiBackupJobIntervalWEEKLY:
+        job.intervalTime = ui->teWeeklyTime->text();
+        job.intervalDay = ui->cbWeeklyDay->currentIndex();
+        break;
+    case tiBackupJobIntervalMONTHLY:
+        job.intervalTime = ui->teMonthlyTime->text();
+        job.intervalDay = ui->sbMonthlyDay->value();
+        break;
+    }
+
     tiConfBackupJobs jobs;
     jobs.saveBackupJob(job);
 
