@@ -31,6 +31,7 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include "tibackupadd.h"
 #include "tibackupedit.h"
 #include "tipreferences.h"
+#include "tibackupservice.h"
 
 namespace Ui {
 class MainWindow;
@@ -62,10 +63,12 @@ private slots:
     void onManualBackupFinished();
 
     void onTimeUpdate();
+    void updateServiceStatus();
 
 private:
     Ui::MainWindow *ui;
     QLabel *lblTime;
+    tiBackupService *service;
 
     void refreshBackupJobList();
 };

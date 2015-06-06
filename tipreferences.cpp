@@ -39,6 +39,7 @@ tiPreferences::tiPreferences(QWidget *parent) :
     ui->leBackupjobsPath->setText(main_settings->getValue("paths/backupjobs").toString());
     ui->leLogsPath->setText(main_settings->getValue("paths/logs").toString());
     ui->leBackupScriptsPath->setText(main_settings->getValue("paths/scripts").toString());
+    ui->leInitdPath->setText(main_settings->getValue("paths/initd").toString());
 
     ui->leSMTPServer->setText(main_settings->getValue("smtp/server").toString());
     ui->cbSMTPAuth->setChecked(main_settings->getValue("smtp/auth").toBool());
@@ -104,6 +105,7 @@ void tiPreferences::on_btnSave_clicked()
     main_settings->setValue("paths/backupjobs", ui->leBackupjobsPath->text());
     main_settings->setValue("paths/logs", ui->leLogsPath->text());
     main_settings->setValue("paths/scripts", ui->leBackupScriptsPath->text());
+    main_settings->setValue("paths/initd", ui->leInitdPath->text());
 
     main_settings->setValue("smtp/server", ui->leSMTPServer->text());
     main_settings->setValue("smtp/auth", ui->cbSMTPAuth->isChecked());
@@ -142,4 +144,16 @@ void tiPreferences::on_btnBackupjobScripts_clicked()
         return;
 
     ui->leBackupScriptsPath->setText(dir);
+}
+
+void tiPreferences::on_btnInitd_clicked()
+{
+    QString startDir = (ui->leInitdPath->text().isEmpty()) ? "/" : ui->leInitdPath->text();
+
+    QString file = QFileDialog::getOpenFileName(this, trUtf8("Bitte wähle die init.d Datei"), startDir);
+
+    if(file.isEmpty())
+        return;
+
+    ui->leInitdPath->setText(file);
 }

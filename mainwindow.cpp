@@ -74,7 +74,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(timer, SIGNAL(timeout()), this, SLOT(onTimeUpdate()));
     timer->start(1000);
 
+    // Init service class
+    service = new tiBackupService(this);
+
     refreshBackupJobList();
+    updateServiceStatus();
 }
 
 MainWindow::~MainWindow()
@@ -310,4 +314,20 @@ void MainWindow::onTimeUpdate()
 {
     QDateTime curDate = QDateTime::currentDateTime();
     lblTime->setText(curDate.toString("dd.MM.yyyy hh:mm:ss"));
+}
+
+void MainWindow::updateServiceStatus()
+{
+    if(service->status() == tiBackupServiceStatusStarted)
+    {
+        ui->lblServiceStatus->setText(trUtf8("Started"));
+        ui->btnServiceStart->setDisabled(true);
+        ui->btnServiceStop->setEnabled(true);
+    }
+    else if(service->status() == tiBackupServiceStatusStopped)
+    {
+        ui->lblServiceStatus->setText(trUtf8("Stopped"));
+        ui->btnServiceStart->setEnabled(true);
+        ui->btnServiceStop->setDisabled(true);
+    }
 }

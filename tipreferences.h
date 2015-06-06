@@ -53,6 +53,8 @@ private slots:
 
     void on_btnBackupjobScripts_clicked();
 
+    void on_btnInitd_clicked();
+
 private:
     Ui::tiPreferences *ui;
 
