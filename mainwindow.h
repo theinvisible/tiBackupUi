@@ -65,6 +65,10 @@ private slots:
     void onTimeUpdate();
     void updateServiceStatus();
 
+    void on_btnServiceStart_clicked();
+
+    void on_btnServiceStop_clicked();
+
 private:
     Ui::MainWindow *ui;
     QLabel *lblTime;

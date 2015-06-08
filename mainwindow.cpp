@@ -76,6 +76,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Init service class
     service = new tiBackupService(this);
+    connect(service, SIGNAL(serviceStarted()), this, SLOT(updateServiceStatus()));
+    connect(service, SIGNAL(serviceStopped()), this, SLOT(updateServiceStatus()));
 
     refreshBackupJobList();
     updateServiceStatus();
@@ -318,16 +320,38 @@ void MainWindow::onTimeUpdate()
 
 void MainWindow::updateServiceStatus()
 {
-    if(service->status() == tiBackupServiceStatusStarted)
+    switch(service->status())
+    {
+    case tiBackupServiceStatusStarted:
     {
         ui->lblServiceStatus->setText(trUtf8("Started"));
         ui->btnServiceStart->setDisabled(true);
         ui->btnServiceStop->setEnabled(true);
+        break;
     }
-    else if(service->status() == tiBackupServiceStatusStopped)
+    case tiBackupServiceStatusStopped:
     {
         ui->lblServiceStatus->setText(trUtf8("Stopped"));
         ui->btnServiceStart->setEnabled(true);
         ui->btnServiceStop->setDisabled(true);
+        break;
     }
+    case tiBackupServiceStatusNotFound:
+    {
+        ui->lblServiceStatus->setText(trUtf8("init.d script not found"));
+        ui->btnServiceStart->setDisabled(true);
+        ui->btnServiceStop->setDisabled(true);
+        break;
+    }
+    }
+}
+
+void MainWindow::on_btnServiceStart_clicked()
+{
+    service->start();
+}
+
+void MainWindow::on_btnServiceStop_clicked()
+{
+    service->stop();
 }
