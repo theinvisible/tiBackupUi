@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/images">
+        <file alias="copy-icon">res/images/copy-icon.png</file>
+        <file alias="edit-icon">res/images/edit-icon.png</file>
+    </qresource>
+</RCC>

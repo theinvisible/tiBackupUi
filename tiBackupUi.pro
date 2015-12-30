@@ -43,3 +43,6 @@ unix {
     QMAKE_CXXFLAGS_DEBUG += -pipe
     QMAKE_CXXFLAGS_RELEASE += -pipe -O2
 }
+
+RESOURCES += \
+    resui.qrc
