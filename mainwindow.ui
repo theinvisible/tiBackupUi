@@ -39,7 +39,7 @@
          <item>
           <widget class="QPushButton" name="btnAddBackup">
            <property name="text">
-            <string>Backupjob hinzufügen</string>
+            <string>Add Backupjob</string>
            </property>
           </widget>
          </item>
@@ -59,21 +59,21 @@
          <item>
           <widget class="QPushButton" name="btnBackupJobEdit">
            <property name="text">
-            <string>Bearbeiten</string>
+            <string>Edit</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="btnBackupJobDelete">
            <property name="text">
-            <string>Löschen</string>
+            <string>Delete</string>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QPushButton" name="btnStartManualBackup">
            <property name="text">
-            <string>Backup manuell starten</string>
+            <string>Start backup</string>
            </property>
           </widget>
          </item>
@@ -120,7 +120,7 @@
               </font>
              </property>
              <property name="text">
-              <string>Unbekannt</string>
+              <string>Unknown</string>
              </property>
             </widget>
            </item>
@@ -138,16 +138,29 @@
             </spacer>
            </item>
            <item>
+            <widget class="QPushButton" name="btnServiceInstall">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Install service</string>
+             </property>
+             <property name="checkable">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QPushButton" name="btnServiceStart">
              <property name="text">
-              <string>Starten</string>
+              <string>Start</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="btnServiceStop">
              <property name="text">
-              <string>Stoppen</string>
+              <string>Stop</string>
              </property>
             </widget>
            </item>
@@ -166,12 +179,12 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>Datei</string>
+     <string>File</string>
     </property>
     <addaction name="actionPreferences"/>
     <addaction name="separator"/>
@@ -185,7 +198,7 @@
    </widget>
    <widget class="QMenu" name="menuHilfe">
     <property name="title">
-     <string>Hilfe</string>
+     <string>Help</string>
     </property>
     <addaction name="actionAbout"/>
    </widget>
@@ -196,22 +209,22 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionQuit">
    <property name="text">
-    <string>Beenden</string>
+    <string>Exit</string>
    </property>
   </action>
   <action name="actionAddBackupjob">
    <property name="text">
-    <string>Hinzufügen</string>
+    <string>Add...</string>
    </property>
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>Über tiBackup</string>
+    <string>About tiBackup</string>
    </property>
   </action>
   <action name="actionPreferences">
    <property name="text">
-    <string>Einstellungen</string>
+    <string>Preferences</string>
    </property>
   </action>
  </widget>

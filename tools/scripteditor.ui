@@ -25,7 +25,7 @@
         </size>
        </property>
        <property name="text">
-        <string>ScriptPfad</string>
+        <string>Scriptpath</string>
        </property>
       </widget>
      </item>
@@ -62,7 +62,7 @@
      <item>
       <widget class="QPushButton" name="btnAbort">
        <property name="text">
-        <string>Abbrechen</string>
+        <string>Cancel</string>
        </property>
       </widget>
      </item>
@@ -82,7 +82,7 @@
      <item>
       <widget class="QPushButton" name="btnSave">
        <property name="text">
-        <string>Speichern</string>
+        <string>Save</string>
        </property>
       </widget>
      </item>

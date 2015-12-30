@@ -68,6 +68,9 @@ int main(int argc, char *argv[])
 {
     qInstallMsgHandler(logMessageOutput);
     QApplication a(argc, argv);
+
+    Q_INIT_RESOURCE(resdata);
+
     MainWindow w;
     w.show();
 

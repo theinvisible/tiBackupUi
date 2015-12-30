@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>tiBackup - Backup bearbeiten</string>
+   <string>tiBackup - Edit backupjob</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -21,13 +21,13 @@
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>Haupteinstellungen</string>
+       <string>Main</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
-          <string>Laufwerk</string>
+          <string>Drive</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
@@ -54,7 +54,7 @@
             <item row="1" column="0">
              <widget class="QLabel" name="label">
               <property name="text">
-               <string>Backupgerät</string>
+               <string>Backupdevice</string>
               </property>
              </widget>
             </item>
@@ -103,7 +103,7 @@
             <item row="3" column="0">
              <widget class="QLabel" name="label_2">
               <property name="text">
-               <string>Dateisystem</string>
+               <string>Filesystem</string>
               </property>
              </widget>
             </item>
@@ -136,7 +136,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
-          <string>Dateien/Ordner</string>
+          <string>Files/Directories</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
@@ -157,7 +157,7 @@
             <item>
              <widget class="QLabel" name="label_5">
               <property name="text">
-               <string>Quellordner</string>
+               <string>Source Folder</string>
               </property>
              </widget>
             </item>
@@ -187,7 +187,7 @@
             <item>
              <widget class="QLabel" name="label_6">
               <property name="text">
-               <string>Zielordner</string>
+               <string>Dest. Folder</string>
               </property>
              </widget>
             </item>
@@ -210,7 +210,7 @@
             <item>
              <widget class="QPushButton" name="btnAddBackupFolder">
               <property name="text">
-               <string>Hinzufügen...</string>
+               <string>Add...</string>
               </property>
              </widget>
             </item>
@@ -230,7 +230,7 @@
             <item>
              <widget class="QPushButton" name="btnRemoveBackupFolder">
               <property name="text">
-               <string>Entfernen</string>
+               <string>Remove</string>
               </property>
              </widget>
             </item>
@@ -242,7 +242,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string>Backupoptionen</string>
+          <string>Backupoptions</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
@@ -250,28 +250,28 @@
             <item row="0" column="1">
              <widget class="QCheckBox" name="cbBackupOnHotplug">
               <property name="text">
-               <string>Backup starten bei Hotplug</string>
+               <string>Start backup by hotplug event</string>
               </property>
              </widget>
             </item>
             <item row="0" column="0">
              <widget class="QCheckBox" name="cbDeleteAddFilesOnDest">
               <property name="text">
-               <string>Überflüssige Dateien auf Ziel löschen</string>
+               <string>Delete spare files</string>
               </property>
              </widget>
             </item>
             <item row="1" column="0">
              <widget class="QCheckBox" name="cbSaveLog">
               <property name="text">
-               <string>Log speichern</string>
+               <string>Save logs</string>
               </property>
              </widget>
             </item>
             <item row="1" column="1">
              <widget class="QCheckBox" name="cbCompareViaChecksum">
               <property name="text">
-               <string>Dateiabgleich via Checksumme</string>
+               <string>Checksum file comparison</string>
               </property>
              </widget>
             </item>
@@ -283,7 +283,7 @@
        <item>
         <widget class="QGroupBox" name="gbNotify">
          <property name="title">
-          <string>Benachrichtigung</string>
+          <string>Notification</string>
          </property>
          <property name="flat">
           <bool>false</bool>
@@ -306,7 +306,7 @@
                </size>
               </property>
               <property name="text">
-               <string>eMail-Adressen</string>
+               <string>eMail-Addresses</string>
               </property>
              </widget>
             </item>
@@ -328,7 +328,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_4">
          <property name="title">
-          <string>Script nach Mounten des Laufwerkes und vor Start des regulären Backups</string>
+          <string>Script executed after backup device mount and before backup start</string>
          </property>
          <layout class="QFormLayout" name="formLayout_3">
           <property name="fieldGrowthPolicy">
@@ -343,7 +343,7 @@
              </size>
             </property>
             <property name="text">
-             <string>Scriptpfad</string>
+             <string>Scriptpath</string>
             </property>
            </widget>
           </item>
@@ -373,7 +373,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_5">
          <property name="title">
-          <string>Script vor Unmounten des Laufwerkes nach Ende des regulären Backups</string>
+          <string>Script executed before backup device umount and after backup finished</string>
          </property>
          <layout class="QFormLayout" name="formLayout_4">
           <property name="fieldGrowthPolicy">
@@ -388,7 +388,7 @@
              </size>
             </property>
             <property name="text">
-             <string>Scriptpfad</string>
+             <string>Scriptpath</string>
             </property>
            </widget>
           </item>
@@ -432,13 +432,13 @@
      </widget>
      <widget class="QWidget" name="tab_3">
       <attribute name="title">
-       <string>Aufgabenplanung</string>
+       <string>Tasks</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
         <widget class="QGroupBox" name="groupBox_6">
          <property name="title">
-          <string>Zeitplanung für automatische Backups</string>
+          <string>Scheduler for automated backups</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
@@ -452,7 +452,7 @@
                </size>
               </property>
               <property name="text">
-               <string>Intervall</string>
+               <string>Interval</string>
               </property>
              </widget>
             </item>
@@ -460,22 +460,22 @@
              <widget class="QComboBox" name="cbInterval">
               <item>
                <property name="text">
-                <string>Keine</string>
+                <string>None</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>Täglich</string>
+                <string>Daily</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>Wöchentlich</string>
+                <string>Weekly</string>
                </property>
               </item>
               <item>
                <property name="text">
-                <string>Monatlich</string>
+                <string>Monthly</string>
                </property>
               </item>
              </widget>
@@ -499,7 +499,7 @@
                    </size>
                   </property>
                   <property name="text">
-                   <string>Uhrzeit</string>
+                   <string>Time</string>
                   </property>
                  </widget>
                 </item>
@@ -526,14 +526,14 @@
                    </size>
                   </property>
                   <property name="text">
-                   <string>Wochentag</string>
+                   <string>Day of week</string>
                   </property>
                  </widget>
                 </item>
                 <item row="1" column="0">
                  <widget class="QLabel" name="label_15">
                   <property name="text">
-                   <string>Uhrzeit</string>
+                   <string>Time</string>
                   </property>
                  </widget>
                 </item>
@@ -541,37 +541,37 @@
                  <widget class="QComboBox" name="cbWeeklyDay">
                   <item>
                    <property name="text">
-                    <string>Montag</string>
+                    <string>Monday</string>
                    </property>
                   </item>
                   <item>
                    <property name="text">
-                    <string>Dienstag</string>
+                    <string>Tuesday</string>
                    </property>
                   </item>
                   <item>
                    <property name="text">
-                    <string>Mittwoch</string>
+                    <string>Wednesday</string>
                    </property>
                   </item>
                   <item>
                    <property name="text">
-                    <string>Donnerstag</string>
+                    <string>Thursday</string>
                    </property>
                   </item>
                   <item>
                    <property name="text">
-                    <string>Freitag</string>
+                    <string>Friday</string>
                    </property>
                   </item>
                   <item>
                    <property name="text">
-                    <string>Samstag</string>
+                    <string>Saturday</string>
                    </property>
                   </item>
                   <item>
                    <property name="text">
-                    <string>Sonntag</string>
+                    <string>Sunday</string>
                    </property>
                   </item>
                  </widget>
@@ -592,14 +592,14 @@
                    </size>
                   </property>
                   <property name="text">
-                   <string>Monatstag</string>
+                   <string>Day of month</string>
                   </property>
                  </widget>
                 </item>
                 <item row="1" column="0">
                  <widget class="QLabel" name="label_17">
                   <property name="text">
-                   <string>Uhrzeit</string>
+                   <string>Time</string>
                   </property>
                  </widget>
                 </item>
@@ -647,7 +647,7 @@
      <item>
       <widget class="QPushButton" name="btnCancel">
        <property name="text">
-        <string>Abbrechen</string>
+        <string>Cancel</string>
        </property>
       </widget>
      </item>
@@ -667,7 +667,7 @@
      <item>
       <widget class="QPushButton" name="btnEditBackupJob">
        <property name="text">
-        <string>Backupjob speichern</string>
+        <string>Save backupjob</string>
        </property>
       </widget>
      </item>

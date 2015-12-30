@@ -75,7 +75,7 @@ void scriptEditor::on_btnScriptFileChoose_clicked()
 {
     QString startFile = (ui->leScriptPath->text().isEmpty()) ? "/" : ui->leScriptPath->text();
 
-    QString file = QFileDialog::getOpenFileName(this, trUtf8("Bitte wähle eine Datei"), startFile);
+    QString file = QFileDialog::getOpenFileName(this, trUtf8("Choose a file"), startFile);
 
     if(file.isEmpty())
         return;

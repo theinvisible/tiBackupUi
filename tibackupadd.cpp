@@ -105,7 +105,7 @@ void tiBackupAdd::on_btnSelectSource_clicked()
 {
     QString startDir = (ui->leSourceFolder->text().isEmpty()) ? "/" : ui->leSourceFolder->text();
 
-    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wählen Sie das Quellverzeichnis"),
+    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Choose the source directory"),
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
@@ -132,7 +132,7 @@ void tiBackupAdd::on_btnSelectDest_clicked()
 
     QString startDir = (ui->leDestFolder->text().isEmpty()) ? defaultPath : ui->leDestFolder->text();
 
-    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wählen Sie das Zielverzeichnis"),
+    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Choose the destination directory"),
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
@@ -177,7 +177,7 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
 
     if(ui->leBackupJobName->text().isEmpty())
     {
-        QMessageBox::information(this, QString::fromUtf8("Backupjob hinzufügen"), QString::fromUtf8("Es muss ein Name für den Backupjob angegeben werden."));
+        QMessageBox::information(this, QString::fromUtf8("Add backupjob"), QString::fromUtf8("You must set a name for the backupjob."));
         return;
     }
 
@@ -279,7 +279,7 @@ void tiBackupAdd::on_btnPartitionMount_clicked()
     TiBackupLib lib;
     if(lib.isMounted(part.name))
     {
-        QMessageBox::information(this, QString::fromUtf8("Mountinformation"), QString::fromUtf8("Das Laufwerk ist schon gemounted."));
+        QMessageBox::information(this, QString::fromUtf8("Mountinformation"), QString::fromUtf8("The drive is already mounted."));
     }
     else
     {
@@ -303,12 +303,12 @@ void tiBackupAdd::updatePartitionInformation()
     if(lib.isMounted(part.name))
     {
         ui->btnPartitionMount->setDisabled(true);
-        ui->lblMountInfo->setText(QString("Partition %1 ist gemounted auf %2").arg(part.name, lib.getMountDir(part.name)));
+        ui->lblMountInfo->setText(QString("Partition %1 is mounted on %2").arg(part.name, lib.getMountDir(part.name)));
     }
     else
     {
         ui->btnPartitionMount->setEnabled(true);
-        ui->lblMountInfo->setText(QString("Partition %1 ist nicht gemounted").arg(part.name));
+        ui->lblMountInfo->setText(QString("Partition %1 is not mounted").arg(part.name));
     }
 }
 

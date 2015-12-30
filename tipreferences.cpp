@@ -72,7 +72,7 @@ void tiPreferences::on_btnBackupjobs_clicked()
 {
     QString startDir = (ui->leBackupjobsPath->text().isEmpty()) ? "/" : ui->leBackupjobsPath->text();
 
-    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wähle ein Verzeichnis"),
+    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Choose a directory"),
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
@@ -87,7 +87,7 @@ void tiPreferences::on_btnLogs_clicked()
 {
     QString startDir = (ui->leLogsPath->text().isEmpty()) ? "/" : ui->leLogsPath->text();
 
-    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wähle ein Verzeichnis"),
+    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Choose a directory"),
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
@@ -135,7 +135,7 @@ void tiPreferences::on_btnBackupjobScripts_clicked()
 {
     QString startDir = (ui->leBackupScriptsPath->text().isEmpty()) ? "/" : ui->leBackupScriptsPath->text();
 
-    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wähle ein Verzeichnis"),
+    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Choose a directory"),
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
@@ -150,7 +150,7 @@ void tiPreferences::on_btnInitd_clicked()
 {
     QString startDir = (ui->leInitdPath->text().isEmpty()) ? "/" : ui->leInitdPath->text();
 
-    QString file = QFileDialog::getOpenFileName(this, trUtf8("Bitte wähle die init.d Datei"), startDir);
+    QString file = QFileDialog::getOpenFileName(this, trUtf8("Choose the init.d file"), startDir);
 
     if(file.isEmpty())
         return;

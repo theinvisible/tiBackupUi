@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>480</height>
+    <height>508</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,13 +21,13 @@
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>Allgemein</string>
+       <string>Common</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
         <widget class="QGroupBox" name="groupBox">
          <property name="title">
-          <string>Haupteinstellungen</string>
+          <string>Main preferences</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
@@ -60,7 +60,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
-          <string>Pfade</string>
+          <string>Paths</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
@@ -74,14 +74,14 @@
                </size>
               </property>
               <property name="text">
-               <string>Backupjob-Konfigurationen</string>
+               <string>Backupjob configurations</string>
               </property>
              </widget>
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_2">
               <property name="text">
-               <string>Backupjob-Logs</string>
+               <string>Backupjob logs</string>
               </property>
              </widget>
             </item>
@@ -128,7 +128,7 @@
             <item row="2" column="0">
              <widget class="QLabel" name="label_7">
               <property name="text">
-               <string>Backupjob-Scripts</string>
+               <string>Backupjob scripts</string>
               </property>
              </widget>
             </item>
@@ -155,7 +155,7 @@
             <item row="3" column="0">
              <widget class="QLabel" name="label_8">
               <property name="text">
-               <string>Pfad zur init.d</string>
+               <string>init.d path</string>
               </property>
              </widget>
             </item>
@@ -187,7 +187,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_3">
          <property name="title">
-          <string>SMTP Einstellungen</string>
+          <string>SMTP preferences</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
@@ -208,14 +208,14 @@
             <item row="2" column="0">
              <widget class="QLabel" name="label_4">
               <property name="text">
-               <string>Benutzername</string>
+               <string>Username</string>
               </property>
              </widget>
             </item>
             <item row="3" column="0">
              <widget class="QLabel" name="label_5">
               <property name="text">
-               <string>Passwort</string>
+               <string>Password</string>
               </property>
              </widget>
             </item>
@@ -235,7 +235,7 @@
             <item row="1" column="0">
              <widget class="QLabel" name="label_6">
               <property name="text">
-               <string>Authentifizierung benötigt</string>
+               <string>Need authentication</string>
               </property>
              </widget>
             </item>
@@ -291,14 +291,14 @@
      <item>
       <widget class="QPushButton" name="btnAbort">
        <property name="text">
-        <string>Abbrechen</string>
+        <string>Cancel</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="btnSave">
        <property name="text">
-        <string>Speichern</string>
+        <string>Save</string>
        </property>
       </widget>
      </item>

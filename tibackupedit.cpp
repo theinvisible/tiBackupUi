@@ -45,7 +45,7 @@ tiBackupEdit::tiBackupEdit(QWidget *parent, tiBackupJob *job) :
     parent->installEventFilter(this);
 
     QStringList headers;
-    headers << "Quellordner" << "Zielordner";
+    headers << "Quellordner" << "Destinationfolder";
 
     QStandardItemModel *model = new QStandardItemModel(ui->tvBackupFolders);
     model->setHorizontalHeaderLabels(headers);
@@ -199,12 +199,12 @@ void tiBackupEdit::updatePartitionInformation()
     if(lib.isMounted(part.name))
     {
         ui->btnPartitionMount->setDisabled(true);
-        ui->lblMountInfo->setText(QString("Partition %1 ist gemounted auf %2").arg(part.name, lib.getMountDir(part.name)));
+        ui->lblMountInfo->setText(QString("Partition %1 is mounted on %2").arg(part.name, lib.getMountDir(part.name)));
     }
     else
     {
         ui->btnPartitionMount->setEnabled(true);
-        ui->lblMountInfo->setText(QString("Partition %1 ist nicht gemounted").arg(part.name));
+        ui->lblMountInfo->setText(QString("Partition %1 is not mounted").arg(part.name));
     }
 }
 
@@ -289,7 +289,7 @@ void tiBackupEdit::on_btnSelectSource_clicked()
 {
     QString startDir = (ui->leSourceFolder->text().isEmpty()) ? "/" : ui->leSourceFolder->text();
 
-    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wählen Sie das Quellverzeichnis"),
+    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Choose the source directory"),
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
@@ -308,7 +308,7 @@ void tiBackupEdit::on_btnSelectDest_clicked()
 
     QString startDir = (ui->leDestFolder->text().isEmpty()) ? defaultPath : ui->leDestFolder->text();
 
-    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Bitte wählen Sie das Zielverzeichnis"),
+    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Choose the destination directory"),
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
@@ -358,7 +358,7 @@ void tiBackupEdit::on_btnEditBackupJob_clicked()
 
     if(ui->leBackupJobName->text().isEmpty())
     {
-        QMessageBox::information(this, QString::fromUtf8("Backupjob hinzufügen"), QString::fromUtf8("Es muss ein Name für den Backupjob angegeben werden."));
+        QMessageBox::information(this, QString::fromUtf8("Edit backupjob"), QString::fromUtf8("You must set a name for the backupjob."));
         return;
     }
 
@@ -369,7 +369,7 @@ void tiBackupEdit::on_btnEditBackupJob_clicked()
         // We must rename the job
         if(!jobs.renameJob(currentJob->name, ui->leBackupJobName->text()))
         {
-            QMessageBox::information(this, QString::fromUtf8("Backupjob hinzufügen"), QString::fromUtf8("Der Backupjob-Name konnte nicht geändert werden."));
+            QMessageBox::information(this, QString::fromUtf8("Edit backupjob"), QString::fromUtf8("The backupjob name could not be changed."));
             return;
         }
         job.name = ui->leBackupJobName->text();
@@ -484,7 +484,7 @@ void tiBackupEdit::on_btnPartitionMount_clicked()
     TiBackupLib lib;
     if(lib.isMounted(part.name))
     {
-        QMessageBox::information(this, QString::fromUtf8("Mountinformation"), QString::fromUtf8("Das Laufwerk ist schon gemounted."));
+        QMessageBox::information(this, QString::fromUtf8("Mountinformation"), QString::fromUtf8("The drive is already mounted."));
     }
     else
     {
