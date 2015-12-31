@@ -47,6 +47,9 @@ private slots:
 
     void on_btnScriptFileChoose_clicked();
 
+    void on_btnInsertVar1_clicked();
+    void on_btnCopyVar1_clicked();
+
 signals:
     void scriptSaved(QString filePath);
 

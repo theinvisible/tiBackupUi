@@ -27,6 +27,7 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QFile>
 #include <QTextStream>
 #include <QFileDialog>
+#include <QClipboard>
 
 scriptEditor::scriptEditor(QWidget *parent) :
     QWidget(parent),
@@ -82,4 +83,15 @@ void scriptEditor::on_btnScriptFileChoose_clicked()
 
     ui->leScriptPath->setText(file);
     loadScript(file);
+}
+
+void scriptEditor::on_btnInsertVar1_clicked()
+{
+    ui->teScriptSource->setText("test");
+}
+
+void scriptEditor::on_btnCopyVar1_clicked()
+{
+    QClipboard *clipboard = QApplication::clipboard();
+    clipboard->setText("%MNTBACKUPDIR%");
 }

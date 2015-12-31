@@ -98,39 +98,47 @@
      <item row="1" column="2">
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QLabel" name="label_6">
+        <widget class="QPushButton" name="btnInsertVar1">
          <property name="maximumSize">
           <size>
            <width>16</width>
            <height>16</height>
           </size>
          </property>
+         <property name="toolTip">
+          <string>Inserts var in editor</string>
+         </property>
          <property name="text">
           <string/>
          </property>
-         <property name="pixmap">
-          <pixmap resource="../resui.qrc">:/images/edit-icon</pixmap>
+         <property name="icon">
+          <iconset resource="../resui.qrc">
+           <normaloff>:/images/edit-icon</normaloff>:/images/edit-icon</iconset>
          </property>
-         <property name="scaledContents">
+         <property name="flat">
           <bool>true</bool>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="label_5">
+        <widget class="QPushButton" name="btnCopyVar1">
          <property name="maximumSize">
           <size>
            <width>16</width>
            <height>16</height>
           </size>
          </property>
+         <property name="toolTip">
+          <string>Copy var to clipboard</string>
+         </property>
          <property name="text">
           <string/>
          </property>
-         <property name="pixmap">
-          <pixmap resource="../resui.qrc">:/images/copy-icon</pixmap>
+         <property name="icon">
+          <iconset resource="../resui.qrc">
+           <normaloff>:/images/copy-icon</normaloff>:/images/copy-icon</iconset>
          </property>
-         <property name="scaledContents">
+         <property name="flat">
           <bool>true</bool>
          </property>
         </widget>
