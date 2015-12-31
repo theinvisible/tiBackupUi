@@ -1,0 +1,15 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	mkdir -p debian/tibackupui/usr/bin
+	mkdir -p debian/tibackupui/usr/share/polkit-1/actions
+	mkdir -p debian/tibackupui/usr/share/applications
+	mkdir -p debian/tibackupui/usr/share/pixmaps
+	cp -a tiBackupUi debian/tibackupui/usr/bin/.
+	cp -a tiBackupUi-pkexec debian/tibackupui/usr/bin/.
+	cp -a policykit/net.iksdeh.pkexec.tibackupui.policy debian/tibackupui/usr/share/polkit-1/actions/.
+	cp -a app-entry/tibackupui.desktop debian/tibackupui/usr/share/applications/.
+	cp -a app-entry/tibackup.png debian/tibackupui/usr/share/pixmaps/.

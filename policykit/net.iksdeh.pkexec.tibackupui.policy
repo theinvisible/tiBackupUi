@@ -4,15 +4,15 @@
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <policyconfig>
 
-  <action id="net.iksdeh.pkexec.tibackup">
+  <action id="net.iksdeh.pkexec.tibackupui">
     <message>Authentication is required to run tiBackup</message>
-    <icon_name>tibackup</icon_name>
+    <icon_name>tibackupui</icon_name>
     <defaults>
       <allow_any>auth_admin_keep</allow_any>
       <allow_inactive>auth_admin_keep</allow_inactive>
       <allow_active>auth_admin_keep</allow_active>
     </defaults>
-    <annotate key="org.freedesktop.policykit.exec.path">/home/rene/DEV/bin/tiBackupUi</annotate>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/tiBackupUi</annotate>
     <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
   </action>
 
