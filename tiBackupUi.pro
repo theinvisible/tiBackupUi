@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -17,7 +17,6 @@ SOURCES += main.cpp\
     tibackupadd.cpp \
     tibackupedit.cpp \
     tipreferences.cpp \
-    workers/tibackupjobworker.cpp \
     tools/scripteditor.cpp \
     tools/taskplaner.cpp
 
@@ -25,7 +24,6 @@ HEADERS  += mainwindow.h \
     tibackupadd.h \
     tibackupedit.h \
     tipreferences.h \
-    workers/tibackupjobworker.h \
     tools/scripteditor.h \
     tools/taskplaner.h
 

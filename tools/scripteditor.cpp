@@ -87,7 +87,7 @@ void scriptEditor::on_btnScriptFileChoose_clicked()
 
 void scriptEditor::on_btnInsertVar1_clicked()
 {
-    ui->teScriptSource->setText("test");
+    ui->teScriptSource->textCursor().insertText("%MNTBACKUPDIR%");
 }
 
 void scriptEditor::on_btnCopyVar1_clicked()

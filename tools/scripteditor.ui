@@ -106,7 +106,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>Inserts var in editor</string>
+          <string>Inserts var at cursor position</string>
          </property>
          <property name="text">
           <string/>

@@ -33,9 +33,11 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QThread>
 #include <QTimer>
 #include <QDateTime>
+#include <QLocalSocket>
 
 #include "config.h"
 #include "ticonf.h"
+#include "tibackupapi.h"
 #include "workers/tibackupjobworker.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -265,6 +267,7 @@ void MainWindow::on_btnStartManualBackup_clicked()
     //tiBackupJob *job = jobss.getJobByName(jobName);
     //job->startBackup();
 
+    /*
     QThread* thread = new QThread;
     tiBackupJobWorker* worker = new tiBackupJobWorker();
     worker->setJobName(jobName);
@@ -276,6 +279,35 @@ void MainWindow::on_btnStartManualBackup_clicked()
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
     connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
     thread->start();
+    */
+
+    QLocalSocket *apiClient = new QLocalSocket(this);
+    connect(apiClient, SIGNAL(disconnected()), this, SLOT(onManualBackupFinished()));
+    apiClient->connectToServer("tibackup");
+    if(apiClient->waitForConnected(1000))
+    {
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_4_0);
+        QHash<QString, QString> apiData;
+        apiData[tiBackupApi::API_VAR_CMD] = tiBackupApi::API_CMD_START;
+        apiData[tiBackupApi::API_VAR_BACKUPJOB] = jobName;
+        out << apiData;
+
+        apiClient->write(block);
+        apiClient->flush();
+    }
+    else
+    {
+        qWarning() << apiClient->errorString();
+        QMessageBox::warning(this, trUtf8("Error when trying to start backupjob"),
+                                    trUtf8("Check if your tiBackup service is running or try to restart."));
+
+        onManualBackupFinished();
+    }
+
+    apiClient->close();
+    apiClient->disconnect();
 }
 
 void MainWindow::ontiBackupLogChanged(const QString &path)
