@@ -29,8 +29,14 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 
 QFile *tibackupLog = 0;
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+void logMessageOutput(QtMsgType type, const QMessageLogContext &, const QString & str)
+{
+    const char * msg = str.toStdString().c_str();
+#else
 void logMessageOutput(QtMsgType type, const char *msg)
 {
+#endif
     tiConfMain main_settings;
 
     if(tibackupLog == 0)
@@ -66,7 +72,12 @@ void logMessageOutput(QtMsgType type, const char *msg)
 
 int main(int argc, char *argv[])
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    qInstallMessageHandler(logMessageOutput);
+#else
     qInstallMsgHandler(logMessageOutput);
+#endif
+
     QApplication a(argc, argv);
 
     Q_INIT_RESOURCE(resdata);
