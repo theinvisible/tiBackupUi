@@ -331,7 +331,7 @@ void MainWindow::ontiBackupLogChanged(const QString &path)
             continue;
         }
 
-        loglines.append(buf);
+        loglines.append(QString::fromUtf8(buf));
     }
 
     //QString loglines = QString::fromAscii(buf);
