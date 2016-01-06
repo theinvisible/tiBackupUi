@@ -44,7 +44,7 @@ tiPreferences::tiPreferences(QWidget *parent) :
     ui->leSMTPServer->setText(main_settings->getValue("smtp/server").toString());
     ui->cbSMTPAuth->setChecked(main_settings->getValue("smtp/auth").toBool());
     ui->leSMTPUsername->setText(main_settings->getValue("smtp/username").toString());
-    ui->leSMTPPassword->setText(main_settings->getValue("smtp/password").toString());
+    ui->leSMTPPassword->setText(QByteArray().fromBase64(QByteArray().append(main_settings->getValue("smtp/password").toString())));
 
     if(ui->cbSMTPAuth->isChecked() == true)
     {
@@ -110,7 +110,7 @@ void tiPreferences::on_btnSave_clicked()
     main_settings->setValue("smtp/server", ui->leSMTPServer->text());
     main_settings->setValue("smtp/auth", ui->cbSMTPAuth->isChecked());
     main_settings->setValue("smtp/username", ui->leSMTPUsername->text());
-    main_settings->setValue("smtp/password", ui->leSMTPPassword->text());
+    main_settings->setValue("smtp/password", QString(ui->leSMTPPassword->text().toAscii().toBase64()));
 
     main_settings->sync();
 

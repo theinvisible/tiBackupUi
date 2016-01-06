@@ -39,24 +39,9 @@ tiBackupAdd::tiBackupAdd(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    int i=0;
     ui->btnPartitionMount->setDisabled(true);
 
-    // Load available Backup devices
-    TiBackupLib blib;
-    QList<DeviceDisk> disks = blib.getAttachedDisks();
-    qDebug() << "tiBackupAdd::tiBackupAdd() -> disks found:" << disks.count();
-
-    for(i=0; i < disks.count(); i++)
-    {
-        DeviceDisk disk = disks.at(i);
-
-        qDebug() << "tiBackupAdd::tiBackupAdd() -> disk:" << disk.devname;
-        if(disk.devtype == "disk")
-        {
-            ui->comboBackupDevice->insertItem(0, QString("%1 - %2 (%3)").arg(disk.vendor, disk.model, disk.devname), disk.devname);
-        }
-    }
+    refreshBackupDevices();
 
     parent->installEventFilter(this);
 
@@ -312,9 +297,35 @@ void tiBackupAdd::updatePartitionInformation()
     }
 }
 
+void tiBackupAdd::refreshBackupDevices()
+{
+    ui->comboBackupDevice->clear();
+
+    // Load available Backup devices
+    TiBackupLib blib;
+    QList<DeviceDisk> disks = blib.getAttachedDisks();
+    qDebug() << "tiBackupAdd::tiBackupAdd() -> disks found:" << disks.count();
+
+    for(int i=0; i < disks.count(); i++)
+    {
+        DeviceDisk disk = disks.at(i);
+
+        qDebug() << "tiBackupAdd::tiBackupAdd() -> disk:" << disk.devname;
+        if(disk.devtype == "disk")
+        {
+            ui->comboBackupDevice->insertItem(0, QString("%1 - %2 (%3)").arg(disk.vendor, disk.model, disk.devname), disk.devname);
+        }
+    }
+}
+
 void tiBackupAdd::on_btnCancel_clicked()
 {
     parentWidget()->close();
+}
+
+void tiBackupAdd::on_btnRefreshDevices_clicked()
+{
+    refreshBackupDevices();
 }
 
 void tiBackupAdd::on_btnEditScriptBeforeBackup_clicked()

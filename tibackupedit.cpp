@@ -53,21 +53,7 @@ tiBackupEdit::tiBackupEdit(QWidget *parent, tiBackupJob *job) :
     ui->tvBackupFolders->setModel(model);
     ui->tvBackupFolders->header()->resizeSection(0, 350);
 
-    // Load available Backup devices
-    TiBackupLib blib;
-    QList<DeviceDisk> disks = blib.getAttachedDisks();
-    qDebug() << "tiBackupEdit::tiBackupEdit() -> disks found:" << disks.count();
-
-    for(int i=0; i < disks.count(); i++)
-    {
-        DeviceDisk disk = disks.at(i);
-
-        qDebug() << "tiBackupEdit::tiBackupEdit() -> disk:" << disk.devname;
-        if(disk.devtype == "disk")
-        {
-            ui->comboBackupDevice->insertItem(0, QString("%1 - %2 (%3)").arg(disk.vendor, disk.model, disk.devname), disk.devname);
-        }
-    }
+    refreshBackupDevices();
 
     updateJobDetails();
     if(currentJobDiskisAttached == true)
@@ -205,6 +191,27 @@ void tiBackupEdit::updatePartitionInformation()
     {
         ui->btnPartitionMount->setEnabled(true);
         ui->lblMountInfo->setText(QString("Partition %1 is not mounted").arg(part.name));
+    }
+}
+
+void tiBackupEdit::refreshBackupDevices()
+{
+    ui->comboBackupDevice->clear();
+
+    // Load available Backup devices
+    TiBackupLib blib;
+    QList<DeviceDisk> disks = blib.getAttachedDisks();
+    qDebug() << "tiBackupAdd::tiBackupAdd() -> disks found:" << disks.count();
+
+    for(int i=0; i < disks.count(); i++)
+    {
+        DeviceDisk disk = disks.at(i);
+
+        qDebug() << "tiBackupAdd::tiBackupAdd() -> disk:" << disk.devname;
+        if(disk.devtype == "disk")
+        {
+            ui->comboBackupDevice->insertItem(0, QString("%1 - %2 (%3)").arg(disk.vendor, disk.model, disk.devname), disk.devname);
+        }
     }
 }
 
@@ -496,6 +503,11 @@ void tiBackupEdit::on_btnPartitionMount_clicked()
 void tiBackupEdit::on_comboBackupPartition_activated(int index)
 {
     updatePartitionInformation();
+}
+
+void tiBackupEdit::on_btnRefreshDevices_clicked()
+{
+    refreshBackupDevices();
 }
 
 void tiBackupEdit::on_btnEditScriptBeforeBackup_clicked()

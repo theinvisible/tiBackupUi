@@ -52,6 +52,7 @@ private slots:
     void on_comboBackupPartition_currentIndexChanged(int index);
     void on_btnPartitionMount_clicked();
     void on_comboBackupPartition_activated(int index);
+    void on_btnRefreshDevices_clicked();
 
     void on_btnEditScriptBeforeBackup_clicked();
     void onScriptBeforeCchanged(QString scriptPath);
@@ -70,6 +71,7 @@ private:
 
     void updateJobDetails();
     void updatePartitionInformation();
+    void refreshBackupDevices();
 
     QString getBackupDeviceValue();
     QString getBackupPartitionValue();

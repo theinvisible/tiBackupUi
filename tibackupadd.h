@@ -51,6 +51,7 @@ private slots:
     void on_btnAddBackupJob_clicked();
     void on_btnPartitionMount_clicked();
     void on_btnCancel_clicked();
+    void on_btnRefreshDevices_clicked();
 
     void on_btnEditScriptBeforeBackup_clicked();
     void onScriptBeforeChanged(QString scriptPath);
@@ -65,6 +66,7 @@ private:
     Ui::tiBackupAdd *ui;
 
     void updatePartitionInformation();
+    void refreshBackupDevices();
 
 protected:
     bool eventFilter(QObject *object, QEvent *event);

@@ -2,5 +2,6 @@
     <qresource prefix="/images">
         <file alias="copy-icon">res/images/copy-icon.png</file>
         <file alias="edit-icon">res/images/edit-icon.png</file>
+        <file alias="refresh-icon">res/images/refresh.png</file>
     </qresource>
 </RCC>
