@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 8.0.0)
 
 Package: tibackupui
 Architecture: amd64
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, tibackup
 Conflicts:
 Replaces:
 Provides: tibackupui
