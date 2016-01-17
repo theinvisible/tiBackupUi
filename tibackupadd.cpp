@@ -130,9 +130,19 @@ void tiBackupAdd::on_btnSelectDest_clicked()
 void tiBackupAdd::on_btnAddBackupFolder_clicked()
 {
     QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvBackupFolders->model());
+    QString src = ui->leSourceFolder->text();
+    QString dst = ui->leDestFolder->text();
 
-    QStandardItem *item = new QStandardItem(ui->leSourceFolder->text());
-    QStandardItem *item2 = new QStandardItem(ui->leDestFolder->text());
+    if(!QFile::exists(src) || !QFile::exists(dst))
+    {
+        QMessageBox::warning(this, trUtf8("Backup folders not found"),
+                                    trUtf8("Backup source or destination folder does not exist, please check your paths."));
+
+        return;
+    }
+
+    QStandardItem *item = new QStandardItem(src);
+    QStandardItem *item2 = new QStandardItem(dst);
 
     int row = model->rowCount();
     model->setItem(row, 0, item);
