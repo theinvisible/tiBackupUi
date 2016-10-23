@@ -110,7 +110,11 @@ void tiPreferences::on_btnSave_clicked()
     main_settings->setValue("smtp/server", ui->leSMTPServer->text());
     main_settings->setValue("smtp/auth", ui->cbSMTPAuth->isChecked());
     main_settings->setValue("smtp/username", ui->leSMTPUsername->text());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    main_settings->setValue("smtp/password", QString(ui->leSMTPPassword->text().toLatin1().toBase64()));
+#else
     main_settings->setValue("smtp/password", QString(ui->leSMTPPassword->text().toAscii().toBase64()));
+#endif
 
     main_settings->sync();
 

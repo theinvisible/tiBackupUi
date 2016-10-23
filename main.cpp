@@ -50,6 +50,24 @@ void logMessageOutput(QtMsgType type, const char *msg)
     QTextStream out(tibackupLog);
     QDateTime currentDate = QDateTime::currentDateTime();
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    switch (type) {
+    case QtDebugMsg:
+        if(tidebug == true)
+            out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Debug: " << str << "\n";
+        break;
+    case QtWarningMsg:
+        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Warning: " << str << "\n";
+        break;
+    case QtCriticalMsg:
+        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Critical: " << str << "\n";
+        break;
+    case QtFatalMsg:
+        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Fatal: " << str << "\n";
+        tibackupLog->flush();
+        abort();
+    }
+#else
     switch (type) {
     case QtDebugMsg:
         if(tidebug == true)
@@ -66,6 +84,7 @@ void logMessageOutput(QtMsgType type, const char *msg)
         tibackupLog->flush();
         abort();
     }
+#endif
 
     tibackupLog->flush();
 }
