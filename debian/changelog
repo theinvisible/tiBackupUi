@@ -1,4 +1,4 @@
-tibackup (0.5.0-1) precise; urgency=low
+tibackupui (0.5.0-1) precise; urgency=low
 
   * Ported to Qt5
 
