@@ -40,6 +40,9 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include "tibackupapi.h"
 #include "workers/tibackupjobworker.h"
 
+#include <unistd.h>
+#include <sys/types.h>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -86,6 +89,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     refreshBackupJobList();
     updateServiceStatus();
+
+    if(getuid())
+        QMessageBox::information(this, "Superuser needed", "This program must run with superuser privileges to function properly.");
 }
 
 MainWindow::~MainWindow()
