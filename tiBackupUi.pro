@@ -36,8 +36,8 @@ FORMS    += mainwindow.ui \
 
 unix {
     message(Building for Unix)
-    INCLUDEPATH += /home/rene/DEV/qtcreator/tiBackupLib
-    LIBS += -L/home/rene/DEV/lib -ltiBackupLib
+    INCLUDEPATH += /home/hare/DEV/qtcreator/tiBackupLib
+    LIBS += -L/home/hare/DEV/lib -ltiBackupLib
     QMAKE_CXXFLAGS_DEBUG += -pipe
     QMAKE_CXXFLAGS_RELEASE += -pipe -O2
 }

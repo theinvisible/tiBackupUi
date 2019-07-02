@@ -1,3 +1,3 @@
 #!/bin/sh
 
-sudo /home/rene/DEV/bin/tiBackupUi
+sudo /home/$USER/DEV/bin/tiBackupUi
