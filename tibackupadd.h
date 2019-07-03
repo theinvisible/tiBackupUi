@@ -29,6 +29,11 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include "ticonf.h"
 #include "tibackuplib.h"
 
+enum tiBackupAddMode {
+    tiBackupAddModeAdd,
+    tiBackupAddModeEdit
+};
+
 namespace Ui {
 class tiBackupAdd;
 }
@@ -38,7 +43,7 @@ class tiBackupAdd : public QWidget
     Q_OBJECT
 
 public:
-    explicit tiBackupAdd(QWidget *parent = 0);
+    explicit tiBackupAdd(tiBackupAddMode mode, tiBackupJob *job = 0, QWidget *parent = 0);
     ~tiBackupAdd();
 
 private slots:
@@ -59,14 +64,25 @@ private slots:
     void on_btnEditScriptAfterBackup_clicked();
     void onScriptAfterChanged(QString scriptPath);
 
+    void on_btnLUKSFileSelector_clicked();
+
 signals:
     void jobAdded(tiBackupJob job);
+    void jobEdited(tiBackupJob job);
 
 private:
     Ui::tiBackupAdd *ui;
 
+    tiBackupJob *currentJob;
+    bool currentJobDiskisAttached;
+
+    void updateJobDetails();
     void updatePartitionInformation();
     void refreshBackupDevices();
+    tiBackupAddMode formmode;
+
+    QString getBackupDeviceValue();
+    QString getBackupPartitionValue();
 
 protected:
     bool eventFilter(QObject *object, QEvent *event);

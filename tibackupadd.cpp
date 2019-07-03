@@ -33,26 +33,53 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 
 #include "tools/scripteditor.h"
 
-tiBackupAdd::tiBackupAdd(QWidget *parent) :
+tiBackupAdd::tiBackupAdd(tiBackupAddMode mode, tiBackupJob *job, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::tiBackupAdd)
 {
     ui->setupUi(this);
+    formmode = mode;
 
     ui->btnPartitionMount->setDisabled(true);
 
-    refreshBackupDevices();
+    if(formmode == tiBackupAddModeAdd)
+    {
+        refreshBackupDevices();
 
-    parent->installEventFilter(this);
+        parent->installEventFilter(this);
 
-    QStringList headers;
-    headers << "Quellordner" << "Zielordner";
+        QStringList headers;
+        headers << "Quellordner" << "Zielordner";
 
-    QStandardItemModel *model = new QStandardItemModel(ui->tvBackupFolders);
-    model->setHorizontalHeaderLabels(headers);
+        QStandardItemModel *model = new QStandardItemModel(ui->tvBackupFolders);
+        model->setHorizontalHeaderLabels(headers);
 
-    ui->tvBackupFolders->setModel(model);
-    ui->tvBackupFolders->header()->resizeSection(0, 350);
+        ui->tvBackupFolders->setModel(model);
+        ui->tvBackupFolders->header()->resizeSection(0, 350);
+    }
+    else if(formmode == tiBackupAddModeEdit)
+    {
+        currentJob = job;
+        currentJobDiskisAttached = false;
+        ui->btnPartitionMount->setDisabled(true);
+
+        parent->installEventFilter(this);
+
+        QStringList headers;
+        headers << "Quellordner" << "Zielordner";
+
+        QStandardItemModel *model = new QStandardItemModel(ui->tvBackupFolders);
+        model->setHorizontalHeaderLabels(headers);
+
+        ui->tvBackupFolders->setModel(model);
+        ui->tvBackupFolders->header()->resizeSection(0, 350);
+
+        refreshBackupDevices();
+
+        updateJobDetails();
+        if(currentJobDiskisAttached == true)
+            updatePartitionInformation();
+    }
 }
 
 tiBackupAdd::~tiBackupAdd()
@@ -112,8 +139,8 @@ void tiBackupAdd::on_btnSelectDest_clicked()
     ui->lblDriveType->setText(part.type);
 
     TiBackupLib lib;
-    if(lib.isMounted(part.name))
-        defaultPath = lib.getMountDir(part.name);
+    if(lib.isMounted(&part))
+        defaultPath = lib.getMountDir(&part);
 
     QString startDir = (ui->leDestFolder->text().isEmpty()) ? defaultPath : ui->leDestFolder->text();
 
@@ -124,7 +151,7 @@ void tiBackupAdd::on_btnSelectDest_clicked()
 
     ui->leDestFolder->setText(dir);
 
-    qDebug() << "tiBackupAdd::on_btnSelectDest_clicked() -> generic name::" << TiBackupLib::convertPath2Generic(dir, lib.getMountDir(part.name));
+    qDebug() << "tiBackupAdd::on_btnSelectDest_clicked() -> generic name::" << TiBackupLib::convertPath2Generic(dir, lib.getMountDir(&part));
 }
 
 void tiBackupAdd::on_btnAddBackupFolder_clicked()
@@ -167,72 +194,251 @@ void tiBackupAdd::on_btnRemoveBackupFolder_clicked()
 
 void tiBackupAdd::on_btnAddBackupJob_clicked()
 {
-    QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
-    QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvBackupFolders->model());
-
-    if(ui->leBackupJobName->text().isEmpty())
+    if(formmode == tiBackupAddModeAdd)
     {
-        QMessageBox::information(this, QString::fromUtf8("Add backupjob"), QString::fromUtf8("You must set a name for the backupjob."));
-        return;
-    }
+        QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
+        QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvBackupFolders->model());
 
-    tiBackupJob job;
-    job.name = ui->leBackupJobName->text();
-    job.device = ui->comboBackupDevice->itemText(ui->comboBackupDevice->currentIndex());
-    job.partition_uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
-    job.delete_add_file_on_dest = ui->cbDeleteAddFilesOnDest->isChecked();
-    job.start_backup_on_hotplug = ui->cbBackupOnHotplug->isChecked();
-    job.save_log = ui->cbSaveLog->isChecked();
-    job.compare_via_checksum = ui->cbCompareViaChecksum->isChecked();
-    job.notify = false;
-    if(ui->gbNotify->isChecked() == true)
+        if(ui->leBackupJobName->text().isEmpty())
+        {
+            QMessageBox::information(this, QString::fromUtf8("Add backupjob"), QString::fromUtf8("You must set a name for the backupjob."));
+            return;
+        }
+
+        tiBackupJob job;
+        job.name = ui->leBackupJobName->text();
+        job.device = ui->comboBackupDevice->itemText(ui->comboBackupDevice->currentIndex());
+        job.partition_uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
+        job.delete_add_file_on_dest = ui->cbDeleteAddFilesOnDest->isChecked();
+        job.start_backup_on_hotplug = ui->cbBackupOnHotplug->isChecked();
+        job.save_log = ui->cbSaveLog->isChecked();
+        job.compare_via_checksum = ui->cbCompareViaChecksum->isChecked();
+        job.notify = false;
+        if(ui->gbNotify->isChecked() == true)
+        {
+            job.notify = true;
+            job.notifyRecipients = ui->leNotifyRecipients->text();
+        }
+        job.scriptBeforeBackup = ui->leScriptPathBeforeBackup->text();
+        job.scriptAfterBackup = ui->leScriptPathAfterBackup->text();
+
+        DeviceDisk selDisk;
+        selDisk.devname = devname;
+
+        DeviceDiskPartition part = selDisk.getPartitionByUUID(job.partition_uuid);
+        TiBackupLib lib;
+
+        QHash<QString, QString> h;
+        for(int i=0; i < model->rowCount(); i++)
+        {
+            h.insertMulti(model->item(i, 0)->text(), TiBackupLib::convertPath2Generic(model->item(i, 1)->text(), lib.getMountDir(&part)));
+        }
+        job.backupdirs = h;
+
+        // Set task values
+        job.intervalType = static_cast<tiBackupJobInterval>(ui->cbInterval->currentIndex());
+        job.intervalTime = "0";
+        job.intervalDay = 0;
+        switch(job.intervalType)
+        {
+        case tiBackupJobIntervalNONE:
+            break;
+        case tiBackupJobIntervalDAILY:
+            job.intervalTime = ui->teDailyTime->text();
+            break;
+        case tiBackupJobIntervalWEEKLY:
+            job.intervalTime = ui->teWeeklyTime->text();
+            job.intervalDay = ui->cbWeeklyDay->currentIndex();
+            break;
+        case tiBackupJobIntervalMONTHLY:
+            job.intervalTime = ui->teMonthlyTime->text();
+            job.intervalDay = ui->sbMonthlyDay->value();
+            break;
+        }
+
+        // Set LUKS Enc values
+        job.encLUKSType = static_cast<tiBackupEncLUKS>(ui->cbLUKSOptions->currentIndex());
+        job.encLUKSFilePath = "";
+        switch(job.encLUKSType)
+        {
+        case tiBackupEncLUKSNONE:
+            break;
+        case tiBackupEncLUKSFILE:
+            job.encLUKSFilePath = ui->leLUKSFilePath->text();
+            break;
+        case tiBackupEncLUKSGENUSBDEV:
+            break;
+        }
+
+        tiConfBackupJobs jobs;
+        jobs.saveBackupJob(job);
+
+        parentWidget()->close();
+
+        emit jobAdded(job);
+    }
+    else if(formmode == tiBackupAddModeEdit)
     {
-        job.notify = true;
-        job.notifyRecipients = ui->leNotifyRecipients->text();
+        qDebug() << "tiBackupEdit::on_btnEditBackupJob_clicked() -> BackupDeviceValue::" << getBackupDeviceValue();
+        qDebug() << "tiBackupEdit::on_btnEditBackupJob_clicked() -> BackupPartitionValue::" << getBackupPartitionValue();
+
+        //QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
+        QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvBackupFolders->model());
+        tiConfBackupJobs jobs;
+
+        if(ui->leBackupJobName->text().isEmpty())
+        {
+            QMessageBox::information(this, QString::fromUtf8("Edit backupjob"), QString::fromUtf8("You must set a name for the backupjob."));
+            return;
+        }
+
+        tiBackupJob job = *currentJob;
+
+        if(currentJob->name != ui->leBackupJobName->text())
+        {
+            // We must rename the job
+            if(!jobs.renameJob(currentJob->name, ui->leBackupJobName->text()))
+            {
+                QMessageBox::information(this, QString::fromUtf8("Edit backupjob"), QString::fromUtf8("The backupjob name could not be changed."));
+                return;
+            }
+            job.name = ui->leBackupJobName->text();
+        }
+
+        job.device = getBackupDeviceValue();
+        job.partition_uuid = getBackupPartitionValue();
+        job.delete_add_file_on_dest = ui->cbDeleteAddFilesOnDest->isChecked();
+        job.start_backup_on_hotplug = ui->cbBackupOnHotplug->isChecked();
+        job.save_log = ui->cbSaveLog->isChecked();
+        job.compare_via_checksum = ui->cbCompareViaChecksum->isChecked();
+        job.notify = false;
+        if(ui->gbNotify->isChecked() == true)
+        {
+            job.notify = true;
+            job.notifyRecipients = ui->leNotifyRecipients->text();
+        }
+        job.scriptBeforeBackup = ui->leScriptPathBeforeBackup->text();
+        job.scriptAfterBackup = ui->leScriptPathAfterBackup->text();
+
+        /*
+        DeviceDisk selDisk;
+        selDisk.devname = devname;
+
+        DeviceDiskPartition part = selDisk.getPartitionByUUID(job.partition_uuid);
+        TiBackupLib lib;
+        */
+
+        QHash<QString, QString> h;
+        QString dest;
+        TiBackupLib lib;
+        bool diskMounted = false;
+        DeviceDiskPartition part = TiBackupLib::getPartitionByUUID(getBackupPartitionValue());
+        if(lib.isMounted(&part))
+            diskMounted = true;
+
+        for(int i=0; i < model->rowCount(); i++)
+        {
+            dest = model->item(i, 1)->text();
+            if(diskMounted == true)
+                dest = TiBackupLib::convertPath2Generic(dest, lib.getMountDir(&part));
+
+            //h.insertMulti(model->item(i, 0)->text(), TiBackupLib::convertPath2Generic(model->item(i, 1)->text(), lib.getMountDir(part.name)));
+            h.insertMulti(model->item(i, 0)->text(), dest);
+        }
+        job.backupdirs = h;
+
+        // Set task values
+        job.intervalType = static_cast<tiBackupJobInterval>(ui->cbInterval->currentIndex());
+        job.intervalTime = "0";
+        job.intervalDay = 0;
+        switch(job.intervalType)
+        {
+        case tiBackupJobIntervalNONE:
+            break;
+        case tiBackupJobIntervalDAILY:
+            job.intervalTime = ui->teDailyTime->text();
+            break;
+        case tiBackupJobIntervalWEEKLY:
+            job.intervalTime = ui->teWeeklyTime->text();
+            job.intervalDay = ui->cbWeeklyDay->currentIndex();
+            break;
+        case tiBackupJobIntervalMONTHLY:
+            job.intervalTime = ui->teMonthlyTime->text();
+            job.intervalDay = ui->sbMonthlyDay->value();
+            break;
+        }
+
+        // Set LUKS Enc values
+        job.encLUKSType = static_cast<tiBackupEncLUKS>(ui->cbLUKSOptions->currentIndex());
+        job.encLUKSFilePath = "";
+        switch(job.encLUKSType)
+        {
+        case tiBackupEncLUKSNONE:
+            break;
+        case tiBackupEncLUKSFILE:
+            job.encLUKSFilePath = ui->leLUKSFilePath->text();
+            break;
+        case tiBackupEncLUKSGENUSBDEV:
+            break;
+        }
+
+        jobs.saveBackupJob(job);
+
+        parentWidget()->close();
+
+        emit jobEdited(job);
     }
-    job.scriptBeforeBackup = ui->leScriptPathBeforeBackup->text();
-    job.scriptAfterBackup = ui->leScriptPathAfterBackup->text();
+}
 
-    DeviceDisk selDisk;
-    selDisk.devname = devname;
+QString tiBackupAdd::getBackupDeviceValue()
+{
+    QString selDevname = ui->comboBackupDevice->itemText(ui->comboBackupDevice->currentIndex());
+    QString editDevname = ui->comboBackupDevice->currentText();
 
-    DeviceDiskPartition part = selDisk.getPartitionByUUID(job.partition_uuid);
-    TiBackupLib lib;
+    qDebug() << "tiBackupEdit::getBackupDeviceValue() -> selDev::" << selDevname << "::editDev::" << editDevname << "::";
 
-    QHash<QString, QString> h;
-    for(int i=0; i < model->rowCount(); i++)
+    if(currentJobDiskisAttached == true)
     {
-        h.insertMulti(model->item(i, 0)->text(), TiBackupLib::convertPath2Generic(model->item(i, 1)->text(), lib.getMountDir(part.name)));
+        return selDevname;
     }
-    job.backupdirs = h;
-
-    // Set task values
-    job.intervalType = static_cast<tiBackupJobInterval>(ui->cbInterval->currentIndex());
-    job.intervalTime = "0";
-    job.intervalDay = 0;
-    switch(job.intervalType)
+    else
     {
-    case tiBackupJobIntervalNONE:
-        break;
-    case tiBackupJobIntervalDAILY:
-        job.intervalTime = ui->teDailyTime->text();
-        break;
-    case tiBackupJobIntervalWEEKLY:
-        job.intervalTime = ui->teWeeklyTime->text();
-        job.intervalDay = ui->cbWeeklyDay->currentIndex();
-        break;
-    case tiBackupJobIntervalMONTHLY:
-        job.intervalTime = ui->teMonthlyTime->text();
-        job.intervalDay = ui->sbMonthlyDay->value();
-        break;
+        if(selDevname == editDevname)
+        {
+            return selDevname;
+        }
+        else
+        {
+            return editDevname;
+        }
     }
+}
 
-    tiConfBackupJobs jobs;
-    jobs.saveBackupJob(job);
+QString tiBackupAdd::getBackupPartitionValue()
+{
+    QString selPartition = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
+    QString editPartition = ui->comboBackupPartition->currentText();
 
-    parentWidget()->close();
+    qDebug() << "tiBackupEdit::getBackupPartitionValue() -> selPart::" << selPartition << "::editPart::" << editPartition << "::";
 
-    emit jobAdded(job);
+    if(currentJobDiskisAttached == true)
+    {
+        return selPartition;
+    }
+    else
+    {
+        if(selPartition == editPartition)
+        {
+            return selPartition;
+        }
+        else
+        {
+            if(ui->comboBackupPartition->itemText(ui->comboBackupPartition->currentIndex()) == editPartition)
+                return selPartition;
+
+            return editPartition;
+        }
+    }
 }
 
 bool tiBackupAdd::eventFilter(QObject *object, QEvent *event)
@@ -272,13 +478,17 @@ void tiBackupAdd::on_btnPartitionMount_clicked()
     DeviceDiskPartition part = selDisk.getPartitionByUUID(uuid);
 
     TiBackupLib lib;
-    if(lib.isMounted(part.name))
+    if(lib.isMounted(&part))
     {
         QMessageBox::information(this, QString::fromUtf8("Mountinformation"), QString::fromUtf8("The drive is already mounted."));
     }
     else
     {
-        lib.mountPartition(&part);
+        tiBackupJob job;
+        job.encLUKSType = static_cast<tiBackupEncLUKS>(ui->cbLUKSOptions->currentIndex());
+        job.encLUKSFilePath = ui->leLUKSFilePath->text();
+
+        lib.mountPartition(&part, &job);
         updatePartitionInformation();
     }
 }
@@ -295,10 +505,10 @@ void tiBackupAdd::updatePartitionInformation()
     ui->lblDriveType->setText(part.type);
 
     TiBackupLib lib;
-    if(lib.isMounted(part.name))
+    if(lib.isMounted(&part))
     {
         ui->btnPartitionMount->setDisabled(true);
-        ui->lblMountInfo->setText(QString("Partition %1 is mounted on %2").arg(part.name, lib.getMountDir(part.name)));
+        ui->lblMountInfo->setText(QString("Partition %1 is mounted on %2").arg(part.name, lib.getMountDir(&part)));
     }
     else
     {
@@ -400,4 +610,136 @@ void tiBackupAdd::on_btnEditScriptAfterBackup_clicked()
 void tiBackupAdd::onScriptAfterChanged(QString scriptPath)
 {
     ui->leScriptPathAfterBackup->setText(scriptPath);
+}
+
+void tiBackupAdd::on_btnLUKSFileSelector_clicked()
+{
+    QString startDir = (ui->leLUKSFilePath->text().isEmpty()) ? "/" : ui->leLUKSFilePath->text();
+
+    QString file = QFileDialog::getOpenFileName(this, trUtf8("Choose the password file"));
+
+    ui->leLUKSFilePath->setText(file);
+}
+
+void tiBackupAdd::updateJobDetails()
+{
+    QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvBackupFolders->model());
+    model->removeRows(0, model->rowCount());
+
+    ui->leBackupJobName->setText(currentJob->name);
+    ui->comboBackupDevice->setEditText(currentJob->device);
+    ui->comboBackupPartition->setEditText(currentJob->partition_uuid);
+
+    QHashIterator<QString, QString> it(currentJob->backupdirs);
+    QStandardItem *item = 0;
+    QStandardItem *item2 = 0;
+    int row = model->rowCount();
+
+    while(it.hasNext())
+    {
+        it.next();
+
+        item = new QStandardItem(it.key());
+        item2 = new QStandardItem(it.value());
+
+        model->setItem(row, 0, item);
+        model->setItem(row, 1, item2);
+
+        row++;
+    }
+
+    ui->cbDeleteAddFilesOnDest->setChecked(currentJob->delete_add_file_on_dest);
+    ui->cbBackupOnHotplug->setChecked(currentJob->start_backup_on_hotplug);
+    ui->cbSaveLog->setChecked(currentJob->save_log);
+    ui->cbCompareViaChecksum->setChecked(currentJob->compare_via_checksum);
+    ui->leNotifyRecipients->setText(currentJob->notifyRecipients);
+    if(currentJob->notify == true)
+    {
+        ui->gbNotify->setChecked(true);
+    }
+    ui->leScriptPathBeforeBackup->setText(currentJob->scriptBeforeBackup);
+    ui->leScriptPathAfterBackup->setText(currentJob->scriptAfterBackup);
+
+    // Set defined task if any
+    switch(currentJob->intervalType)
+    {
+    case tiBackupJobIntervalNONE:
+        break;
+    case tiBackupJobIntervalDAILY:
+    {
+        ui->cbInterval->setCurrentIndex(static_cast<int>(currentJob->intervalType));
+        ui->swIntervalSettings->setCurrentIndex(static_cast<int>(currentJob->intervalType));
+        ui->teDailyTime->setDateTime(QDateTime::fromString(currentJob->intervalTime, "hh:mm"));
+        break;
+    }
+    case tiBackupJobIntervalWEEKLY:
+        ui->cbInterval->setCurrentIndex(static_cast<int>(currentJob->intervalType));
+        ui->swIntervalSettings->setCurrentIndex(static_cast<int>(currentJob->intervalType));
+        ui->teWeeklyTime->setDateTime(QDateTime::fromString(currentJob->intervalTime, "hh:mm"));
+        ui->cbWeeklyDay->setCurrentIndex(currentJob->intervalDay);
+        break;
+    case tiBackupJobIntervalMONTHLY:
+        ui->cbInterval->setCurrentIndex(static_cast<int>(currentJob->intervalType));
+        ui->swIntervalSettings->setCurrentIndex(static_cast<int>(currentJob->intervalType));
+        ui->teMonthlyTime->setDateTime(QDateTime::fromString(currentJob->intervalTime, "hh:mm"));
+        ui->sbMonthlyDay->setValue(currentJob->intervalDay);
+        break;
+    }
+
+    // Set defined LUKS settings if any
+    switch(currentJob->encLUKSType)
+    {
+    case tiBackupEncLUKSNONE:
+        break;
+    case tiBackupEncLUKSFILE:
+    {
+        ui->cbLUKSOptions->setCurrentIndex(static_cast<int>(currentJob->encLUKSType));
+        ui->swLUKSOptions->setCurrentIndex(static_cast<int>(currentJob->encLUKSType));
+        ui->leLUKSFilePath->setText(currentJob->encLUKSFilePath);
+        break;
+    }
+    case tiBackupEncLUKSGENUSBDEV:
+        ui->cbLUKSOptions->setCurrentIndex(static_cast<int>(currentJob->encLUKSType));
+        ui->swLUKSOptions->setCurrentIndex(static_cast<int>(currentJob->encLUKSType));
+        break;
+    }
+
+    // We must see if the current job disk is attached
+    // Load available Backup devices
+    TiBackupLib blib;
+    QList<DeviceDisk> disks = blib.getAttachedDisks();
+    for(int i=0; i < disks.count(); i++)
+    {
+        DeviceDisk disk = disks.at(i);
+
+        qDebug() << "tiBackupEdit::updateJobDetails() -> disk:" << disk.devname;
+        if(disk.devtype == "disk")
+        {
+            disk.readPartitions();
+            for(int j=0; j < disk.partitions.count(); j++)
+            {
+                DeviceDiskPartition part = disk.partitions.at(j);
+
+                if(part.uuid.isEmpty())
+                    continue;
+
+                if(part.uuid == currentJob->partition_uuid)
+                {
+                    // Job disk is attached right now
+                    qDebug() << "tiBackupEdit::updateJobDetails() -> job disk is attached right now";
+
+                    int devrow = ui->comboBackupDevice->findData(disk.devname);
+                    int partrow = ui->comboBackupPartition->findData(part.uuid);
+                    qDebug() << "tiBackupEdit::updateJobDetails() -> devrow::" << devrow << "::partrow::" << partrow;
+
+                    ui->comboBackupDevice->setCurrentIndex(devrow);
+                    ui->comboBackupPartition->setCurrentIndex(partrow);
+
+                    currentJobDiskisAttached = true;
+
+                    return;
+                }
+            }
+        }
+    }
 }

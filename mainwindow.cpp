@@ -104,7 +104,7 @@ void MainWindow::on_btnAddBackup_clicked()
     QMainWindow *prefWindow = new QMainWindow(this, Qt::Dialog);
     prefWindow->setWindowModality(Qt::WindowModal);
 
-    tiBackupAdd *f = new tiBackupAdd(prefWindow);
+    tiBackupAdd *f = new tiBackupAdd(tiBackupAddModeAdd, 0, prefWindow);
     prefWindow->setCentralWidget(f);
     prefWindow->setMinimumSize(QSize(f->width(),f->height()));
     prefWindow->setMaximumSize(QSize(f->width(),f->height()));
@@ -224,7 +224,7 @@ void MainWindow::on_btnBackupJobEdit_clicked()
 
     tiConfBackupJobs jobs;
 
-    tiBackupEdit *f = new tiBackupEdit(prefWindow, jobs.getJobByName(jobName));
+    tiBackupAdd *f = new tiBackupAdd(tiBackupAddModeEdit, jobs.getJobByName(jobName), prefWindow);
     prefWindow->setCentralWidget(f);
     prefWindow->setMinimumSize(QSize(f->width(),f->height()));
     prefWindow->setMaximumSize(QSize(f->width(),f->height()));
