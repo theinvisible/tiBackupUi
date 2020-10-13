@@ -1,21 +1,50 @@
-# Is performed before the scripts in the stages step
-before_script:  
-  - source /etc/profile
-
 # Defines stages which are to be executed
 stages:  
   - build
-  
+
+.build_template: &build_template_def
+  before_script:
+    - export CI_T_DATE=`LANG=C date -R`
+    - touch ./debian/changelog
+    - echo ""                                                                             > ./debian/changelog
+    - echo "tibackupui (99.9.${CI_PIPELINE_ID}-1) precise; urgency=low"                  >> ./debian/changelog
+    - echo ""                                                                            >> ./debian/changelog
+    - echo "  * Dev build from master"                                                   >> ./debian/changelog
+    - echo ""                                                                            >> ./debian/changelog
+    - echo " -- Rene Hadler <rene@hadler.me>  ${CI_T_DATE}"                              >> ./debian/changelog
+
 # Stage "ubuntu"
-build-ubuntu-1804-64:  
+build-ubuntu-2004-64-dev:  
+  <<: *build_template_def
   stage: build
   script:
     - mkdir build
     - sudo apt update && sudo apt install tibackuplib-dev -y
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
-    - mv ../tibackupui_*.deb build/
-    - upload_build build/tibackup*.deb || true
+    - mv ../tibackup_*.deb build/
+    - upload_build_dev build/tibackup*.deb || true
+    - sudo apt purge tibackuplib-dev -y && sudo apt autoremove -y
+
+  # The files which are to be made available in GitLab
+  artifacts:
+    paths:
+      - build/*
+
+  tags:
+    - build-ubuntu-2004-64
+  
+# Stage "ubuntu"
+build-ubuntu-1804-64-dev:  
+  <<: *build_template_def
+  stage: build
+  script:
+    - mkdir build
+    - sudo apt update && sudo apt install tibackuplib-dev -y
+    - echo "y" | debuild -- clean
+    - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
+    - mv ../tibackup_*.deb build/
+    - upload_build_dev build/tibackup*.deb || true
     - sudo apt purge tibackuplib-dev -y && sudo apt autoremove -y
 
   # The files which are to be made available in GitLab
@@ -27,15 +56,16 @@ build-ubuntu-1804-64:
     - build-ubuntu-1804-64
 
 # Stage "debian"
-build-debian-10-64:  
+build-debian-10-64-dev:  
+  <<: *build_template_def
   stage: build
   script:
     - mkdir build
     - sudo apt update && sudo apt install tibackuplib-dev -y
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
-    - mv ../tibackupui_*.deb build/
-    - upload_build build/tibackup*.deb || true
+    - mv ../tibackup_*.deb build/
+    - upload_build_dev build/tibackup*.deb || true
     - sudo apt purge tibackuplib-dev -y && sudo apt autoremove -y
 
   # The files which are to be made available in GitLab
@@ -45,3 +75,24 @@ build-debian-10-64:
 
   tags:
     - build-debian-10-64
+
+# Stage "debian"
+build-debian-9-64-dev:  
+  <<: *build_template_def
+  stage: build
+  script:
+    - mkdir build
+    - sudo apt update && sudo apt install tibackuplib-dev -y
+    - echo "y" | debuild -- clean
+    - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
+    - mv ../tibackup_*.deb build/
+    - upload_build_dev build/tibackup*.deb || true
+    - sudo apt purge tibackuplib-dev -y && sudo apt autoremove -y
+
+  # The files which are to be made available in GitLab
+  artifacts:
+    paths:
+      - build/*
+
+  tags:
+    - build-debian-9-64
