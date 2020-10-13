@@ -22,7 +22,7 @@ build-ubuntu-2004-64-dev:
     - sudo apt update && sudo apt install tibackuplib-dev -y
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
-    - mv ../tibackup_*.deb build/
+    - mv ../tibackupui_*.deb build/
     - upload_build_dev build/tibackup*.deb || true
     - sudo apt purge tibackuplib-dev -y && sudo apt autoremove -y
 
@@ -43,7 +43,7 @@ build-ubuntu-1804-64-dev:
     - sudo apt update && sudo apt install tibackuplib-dev -y
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
-    - mv ../tibackup_*.deb build/
+    - mv ../tibackupui_*.deb build/
     - upload_build_dev build/tibackup*.deb || true
     - sudo apt purge tibackuplib-dev -y && sudo apt autoremove -y
 
@@ -64,7 +64,7 @@ build-debian-10-64-dev:
     - sudo apt update && sudo apt install tibackuplib-dev -y
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
-    - mv ../tibackup_*.deb build/
+    - mv ../tibackupui_*.deb build/
     - upload_build_dev build/tibackup*.deb || true
     - sudo apt purge tibackuplib-dev -y && sudo apt autoremove -y
 
@@ -85,7 +85,7 @@ build-debian-9-64-dev:
     - sudo apt update && sudo apt install tibackuplib-dev -y
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
-    - mv ../tibackup_*.deb build/
+    - mv ../tibackupui_*.deb build/
     - upload_build_dev build/tibackup*.deb || true
     - sudo apt purge tibackuplib-dev -y && sudo apt autoremove -y
 
