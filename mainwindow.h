@@ -29,7 +29,6 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QLabel>
 
 #include "tibackupadd.h"
-#include "tibackupedit.h"
 #include "tipreferences.h"
 #include "tibackupservice.h"
 

@@ -15,32 +15,33 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     tibackupadd.cpp \
-    tibackupedit.cpp \
     tipreferences.cpp \
     tools/scripteditor.cpp \
     tools/taskplaner.cpp
 
 HEADERS  += mainwindow.h \
     tibackupadd.h \
-    tibackupedit.h \
     tipreferences.h \
     tools/scripteditor.h \
     tools/taskplaner.h
 
 FORMS    += mainwindow.ui \
     tibackupadd.ui \
-    tibackupedit.ui \
     tipreferences.ui \
     tools/scripteditor.ui \
     tools/taskplaner.ui
 
 unix {
     message(Building for Unix)
-    INCLUDEPATH += /usr/include/tibackuplib
-    LIBS += -ltiBackupLib
+    INCLUDEPATH += /usr/include/tibackuplib ../tiBackupLib
+    LIBS += -L$$(HOME)/DEV/lib -ltiBackupLib
     QMAKE_CXXFLAGS_DEBUG += -pipe
     QMAKE_CXXFLAGS_RELEASE += -pipe -O2
 }
 
 RESOURCES += \
     resui.qrc
+
+DISTFILES += \
+    .gitlab-ci.yml \
+    debian/changelog

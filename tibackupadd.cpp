@@ -108,7 +108,7 @@ void tiBackupAdd::on_comboBackupDevice_currentIndexChanged(int index)
     }
 }
 
-void tiBackupAdd::on_comboBackupPartition_currentIndexChanged(int index)
+void tiBackupAdd::on_comboBackupPartition_currentIndexChanged(__attribute__ ((unused)) int index)
 {
     updatePartitionInformation();
 }
@@ -117,7 +117,7 @@ void tiBackupAdd::on_btnSelectSource_clicked()
 {
     QString startDir = (ui->leSourceFolder->text().isEmpty()) ? "/" : ui->leSourceFolder->text();
 
-    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Choose the source directory"),
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the source directory"),
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
@@ -144,7 +144,7 @@ void tiBackupAdd::on_btnSelectDest_clicked()
 
     QString startDir = (ui->leDestFolder->text().isEmpty()) ? defaultPath : ui->leDestFolder->text();
 
-    QString dir = QFileDialog::getExistingDirectory(this, trUtf8("Choose the destination directory"),
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the destination directory"),
                                                     startDir,
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
@@ -162,8 +162,8 @@ void tiBackupAdd::on_btnAddBackupFolder_clicked()
 
     if(!QFile::exists(src) || !QFile::exists(dst))
     {
-        QMessageBox::warning(this, trUtf8("Backup folders not found"),
-                                    trUtf8("Backup source or destination folder does not exist, please check your paths."));
+        QMessageBox::warning(this, tr("Backup folders not found"),
+                                    tr("Backup source or destination folder does not exist, please check your paths."));
 
         return;
     }
@@ -570,7 +570,7 @@ void tiBackupAdd::on_btnEditScriptBeforeBackup_clicked()
     winScriptEditor->setCentralWidget(e);
     winScriptEditor->setMinimumSize(QSize(e->width(),e->height()));
     //winScriptEditor->setMaximumSize(QSize(e->width(),e->height()));
-    winScriptEditor->setWindowTitle(windowTitle() + QObject::trUtf8(" - Script Editor"));
+    winScriptEditor->setWindowTitle(windowTitle() + QObject::tr(" - Script Editor"));
 
     winScriptEditor->show();
 }
@@ -602,7 +602,7 @@ void tiBackupAdd::on_btnEditScriptAfterBackup_clicked()
     winScriptEditor->setCentralWidget(e);
     winScriptEditor->setMinimumSize(QSize(e->width(),e->height()));
     //winScriptEditor->setMaximumSize(QSize(e->width(),e->height()));
-    winScriptEditor->setWindowTitle(windowTitle() + QObject::trUtf8(" - Script Editor"));
+    winScriptEditor->setWindowTitle(windowTitle() + QObject::tr(" - Script Editor"));
 
     winScriptEditor->show();
 }
@@ -616,7 +616,7 @@ void tiBackupAdd::on_btnLUKSFileSelector_clicked()
 {
     QString startDir = (ui->leLUKSFilePath->text().isEmpty()) ? "/" : ui->leLUKSFilePath->text();
 
-    QString file = QFileDialog::getOpenFileName(this, trUtf8("Choose the password file"));
+    QString file = QFileDialog::getOpenFileName(this, tr("Choose the password file"));
 
     ui->leLUKSFilePath->setText(file);
 }

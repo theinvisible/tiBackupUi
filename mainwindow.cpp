@@ -56,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     move((geom.width() - width()) / 2, (geom.height() - height()) / 2);
 
     QStringList headers;
-    headers << trUtf8("Name") << trUtf8("Devicename") << trUtf8("Backuppartition UUID");
+    headers << tr("Name") << tr("Devicename") << tr("Backuppartition UUID");
 
     QStandardItemModel *model = new QStandardItemModel(ui->tvAvailBackupJobs);
     model->setHorizontalHeaderLabels(headers);
@@ -108,25 +108,25 @@ void MainWindow::on_btnAddBackup_clicked()
     prefWindow->setCentralWidget(f);
     prefWindow->setMinimumSize(QSize(f->width(),f->height()));
     prefWindow->setMaximumSize(QSize(f->width(),f->height()));
-    prefWindow->setWindowTitle(windowTitle() + QObject::trUtf8(" - Add backupjob"));
+    prefWindow->setWindowTitle(windowTitle() + QObject::tr(" - Add backupjob"));
 
     connect(f, SIGNAL(jobAdded(tiBackupJob)), this, SLOT(onjobAdded(tiBackupJob)));
     prefWindow->show();
 }
 
-void MainWindow::onjobAdded(tiBackupJob job)
+void MainWindow::onjobAdded(__attribute__ ((unused)) tiBackupJob job)
 {
     refreshBackupJobList();
 }
 
-void MainWindow::onjobEdited(tiBackupJob job)
+void MainWindow::onjobEdited(__attribute__ ((unused)) tiBackupJob job)
 {
     refreshBackupJobList();
 }
 
 void MainWindow::onActionAbout()
 {
-    QMessageBox::about(this, trUtf8("About tiBackup"), trUtf8("<b>tiBackup %1</b> <br><br>"
+    QMessageBox::about(this, tr("About tiBackup"), tr("<b>tiBackup %1</b> <br><br>"
                                                              "Developer: <b>Rene Hadler</b> <br>"
                                                              "eMail: <a href=mailto:'rene@hadler.me'>rene@hadler.me</a> <br>"
                                                              "Website: <a href=https://hadler.me>https://hadler.me</a></p>"
@@ -182,8 +182,8 @@ void MainWindow::on_btnBackupJobDelete_clicked()
 
     qDebug() << "MainWindow::on_btnBackupJobDelete_clicked() -> remove backupjob with name::" << jobName;
 
-    int ret = QMessageBox::warning(this, trUtf8("Delete backupjob"),
-                                trUtf8("Warning, the selected backupjob will be deleted, continue?"),
+    int ret = QMessageBox::warning(this, tr("Delete backupjob"),
+                                tr("Warning, the selected backupjob will be deleted, continue?"),
                                 QMessageBox::Yes | QMessageBox::No);
 
     switch(ret)
@@ -202,7 +202,7 @@ void MainWindow::on_btnBackupJobDelete_clicked()
     }
     else
     {
-        QMessageBox::information(this, trUtf8("Delete backupjob"), trUtf8("The selected backupjob could not be deleted, an error occured."));
+        QMessageBox::information(this, tr("Delete backupjob"), tr("The selected backupjob could not be deleted, an error occured."));
     }
 
 }
@@ -228,13 +228,13 @@ void MainWindow::on_btnBackupJobEdit_clicked()
     prefWindow->setCentralWidget(f);
     prefWindow->setMinimumSize(QSize(f->width(),f->height()));
     prefWindow->setMaximumSize(QSize(f->width(),f->height()));
-    prefWindow->setWindowTitle(windowTitle() + QObject::trUtf8(" - Edit backupjob <%1>").arg(jobName));
+    prefWindow->setWindowTitle(windowTitle() + QObject::tr(" - Edit backupjob <%1>").arg(jobName));
 
     connect(f, SIGNAL(jobEdited(tiBackupJob)), this, SLOT(onjobEdited(tiBackupJob)));
     prefWindow->show();
 }
 
-void MainWindow::on_tvAvailBackupJobs_doubleClicked(const QModelIndex &index)
+void MainWindow::on_tvAvailBackupJobs_doubleClicked(__attribute__ ((unused)) const QModelIndex &index)
 {
     on_btnBackupJobEdit_clicked();
 }
@@ -248,7 +248,7 @@ void MainWindow::onActionPreferences()
     prefWindow->setCentralWidget(f);
     prefWindow->setMinimumSize(QSize(f->width(),f->height()));
     prefWindow->setMaximumSize(QSize(f->width(),f->height()));
-    prefWindow->setWindowTitle(windowTitle() + QObject::trUtf8(" - Preferences"));
+    prefWindow->setWindowTitle(windowTitle() + QObject::tr(" - Preferences"));
 
     prefWindow->show();
 }
@@ -266,7 +266,7 @@ void MainWindow::on_btnStartManualBackup_clicked()
 
     QString jobName = model->itemFromIndex(sellist.at(0))->text();
     ui->btnStartManualBackup->setDisabled(true);
-    ui->statusBar->showMessage(trUtf8("Backupjob <%1> was started...").arg(jobName));
+    ui->statusBar->showMessage(tr("Backupjob <%1> was started...").arg(jobName));
 
     // We will do this in a seperate thread
     //tiConfBackupJobs jobss;
@@ -306,8 +306,8 @@ void MainWindow::on_btnStartManualBackup_clicked()
     else
     {
         qWarning() << apiClient->errorString();
-        QMessageBox::warning(this, trUtf8("Error when trying to start backupjob"),
-                                    trUtf8("Check if your tiBackup service is running or try to restart."));
+        QMessageBox::warning(this, tr("Error when trying to start backupjob"),
+                                    tr("Check if your tiBackup service is running or try to restart."));
 
         onManualBackupFinished();
     }
@@ -316,7 +316,7 @@ void MainWindow::on_btnStartManualBackup_clicked()
     apiClient->disconnect();
 }
 
-void MainWindow::ontiBackupLogChanged(const QString &path)
+void MainWindow::ontiBackupLogChanged(__attribute__ ((unused)) const QString &path)
 {
     // TODO We can make reading the log more efficient
     tiConfMain main_settings;
@@ -365,7 +365,7 @@ void MainWindow::updateServiceStatus()
     {
     case tiBackupServiceStatusStarted:
     {
-        ui->lblServiceStatus->setText(trUtf8("Started"));
+        ui->lblServiceStatus->setText(tr("Started"));
         ui->btnServiceStart->setDisabled(true);
         ui->btnServiceStop->setEnabled(true);
         ui->btnServiceInstall->setDisabled(true);
@@ -373,7 +373,7 @@ void MainWindow::updateServiceStatus()
     }
     case tiBackupServiceStatusStopped:
     {
-        ui->lblServiceStatus->setText(trUtf8("Stopped"));
+        ui->lblServiceStatus->setText(tr("Stopped"));
         ui->btnServiceStart->setEnabled(true);
         ui->btnServiceStop->setDisabled(true);
         ui->btnServiceInstall->setDisabled(true);
@@ -381,12 +381,31 @@ void MainWindow::updateServiceStatus()
     }
     case tiBackupServiceStatusNotFound:
     {
-        ui->lblServiceStatus->setText(trUtf8("init.d script not found"));
+        ui->lblServiceStatus->setText(tr("init.d script not found"));
         ui->btnServiceStart->setDisabled(true);
         ui->btnServiceStop->setDisabled(true);
         ui->btnServiceInstall->setEnabled(true);
         break;
     }
+    case tiBackupServiceStatusFailed:
+    case tiBackupServiceStatusUnknown:
+    {
+        ui->lblServiceStatus->setText(tr("Service failed"));
+        ui->btnServiceStart->setDisabled(true);
+        ui->btnServiceStop->setDisabled(true);
+        ui->btnServiceInstall->setDisabled(true);
+        break;
+    }
+    }
+
+    switch(TiBackupLib::getSystemInitModel())
+    {
+    case tiBackupInitSystem::Systemd:
+        ui->lblServiceStatus->setText(ui->lblServiceStatus->text().append(" (Systemd)"));
+        break;
+    case tiBackupInitSystem::Other:
+        ui->lblServiceStatus->setText(ui->lblServiceStatus->text().append(" (Other initd)"));
+        break;
     }
 }
 
@@ -405,8 +424,8 @@ void MainWindow::on_btnServiceInstall_clicked()
     QString initd = main_settings->getValue("paths/initd").toString();
     QString installPath = (!initd.isEmpty()) ? initd : tibackup_config::initd_default;
 
-    int ret = QMessageBox::warning(this, trUtf8("Install tiBackup service"),
-                                trUtf8("This will install the tiBackup service in <%1>, continue?").arg(installPath),
+    int ret = QMessageBox::warning(this, tr("Install tiBackup service"),
+                                tr("This will install the tiBackup service in <%1>, continue?").arg(installPath),
                                 QMessageBox::Yes | QMessageBox::No);
 
     switch(ret)
@@ -416,11 +435,11 @@ void MainWindow::on_btnServiceInstall_clicked()
         if(service->install(installPath))
         {
             main_settings->setValue("paths/initd", installPath);
-            QMessageBox::information(this, trUtf8("Install tiBackup service"), trUtf8("Service was installed successfully."));
+            QMessageBox::information(this, tr("Install tiBackup service"), tr("Service was installed successfully."));
         }
         else
         {
-            QMessageBox::information(this, trUtf8("Install tiBackup service"), trUtf8("Service was not installed, error."));
+            QMessageBox::information(this, tr("Install tiBackup service"), tr("Service was not installed, error."));
         }
 
         break;
