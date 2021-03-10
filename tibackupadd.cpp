@@ -30,6 +30,10 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QMessageBox>
 #include <QMainWindow>
 #include <QDateTime>
+#include <QLocalSocket>
+
+#include "config.h"
+#include "tibackupapi.h"
 
 #include "tools/scripteditor.h"
 
@@ -94,12 +98,56 @@ void tiBackupAdd::on_comboBackupDevice_currentIndexChanged(int index)
     ui->comboBackupPartition->clear();
 
     qDebug() << "tiBackupAdd::on_comboBackupDevice_currentIndexChanged() -> selected dev2:" << devname;
+    /*
     DeviceDisk selDisk;
     selDisk.devname = devname;
     selDisk.readPartitions();
     for(int i=0; i < selDisk.partitions.count(); i++)
     {
         DeviceDiskPartition part = selDisk.partitions.at(i);
+
+        if(part.uuid.isEmpty())
+            continue;
+
+        ui->comboBackupPartition->insertItem(0, QString("%1 (%2)").arg(part.name, part.uuid), part.uuid);
+    }
+    */
+    QLocalSocket *apiClient = new QLocalSocket(this);
+    connect(apiClient, SIGNAL(disconnected()), this, SLOT(onManualBackupFinished()));
+    apiClient->connectToServer(tibackup_config::api_sock_name);
+    QList<DeviceDiskPartition> partitions;
+    if(apiClient->waitForConnected(1000))
+    {
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_5_9);
+        QHash<tiBackupApi::API_VAR, QString> apiData;
+        apiData[tiBackupApi::API_VAR::API_VAR_CMD] = tiBackupApi::API_CMD::API_CMD_DISK_GET_PARTITIONS;
+        apiData[tiBackupApi::API_VAR::API_VAR_DEVNAME] = devname;
+        out << apiData;
+
+        apiClient->write(block);
+        apiClient->flush();
+
+        apiClient->waitForReadyRead(5000);
+
+        QDataStream in(apiClient);
+        in.setVersion(QDataStream::Qt_5_9);
+        in >> partitions;
+    }
+    else
+    {
+        qWarning() << apiClient->errorString();
+        QMessageBox::warning(this, tr("Error when accessing API"),
+                                    tr("Check if your tiBackup service is running or try to restart."));
+    }
+
+    apiClient->close();
+    apiClient->disconnect();
+
+    for(int i=0; i < partitions.count(); i++)
+    {
+        DeviceDiskPartition part = partitions.at(i);
 
         if(part.uuid.isEmpty())
             continue;
@@ -498,10 +546,47 @@ void tiBackupAdd::updatePartitionInformation()
     QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
     QString uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
     qDebug() << "tiBackupAdd::updatePartitionInformation() -> selected part uuid:" << uuid;
+
+    /*
     DeviceDisk selDisk;
     selDisk.devname = devname;
-
     DeviceDiskPartition part = selDisk.getPartitionByUUID(uuid);
+    ui->lblDriveType->setText(part.type);
+    */
+
+    QLocalSocket *apiClient = new QLocalSocket(this);
+    apiClient->connectToServer(tibackup_config::api_sock_name);
+    DeviceDiskPartition part;
+    if(apiClient->waitForConnected(1000))
+    {
+        QByteArray block;
+        QDataStream out(&block, QIODevice::WriteOnly);
+        out.setVersion(QDataStream::Qt_5_9);
+        QHash<tiBackupApi::API_VAR, QString> apiData;
+        apiData[tiBackupApi::API_VAR::API_VAR_CMD] = tiBackupApi::API_CMD::API_CMD_DISK_GET_PARTITION_BY_UUID;
+        apiData[tiBackupApi::API_VAR::API_VAR_DEVNAME] = devname;
+        apiData[tiBackupApi::API_VAR::API_VAR_PART_UUID] = uuid;
+        out << apiData;
+
+        apiClient->write(block);
+        apiClient->flush();
+
+        apiClient->waitForReadyRead(5000);
+
+        QDataStream in(apiClient);
+        in.setVersion(QDataStream::Qt_5_9);
+        in >> part;
+    }
+    else
+    {
+        qWarning() << apiClient->errorString();
+        QMessageBox::warning(this, tr("Error when accessing API"),
+                                    tr("Check if your tiBackup service is running or try to restart."));
+    }
+
+    apiClient->close();
+    apiClient->disconnect();
+
     ui->lblDriveType->setText(part.type);
 
     TiBackupLib lib;
@@ -616,7 +701,7 @@ void tiBackupAdd::on_btnLUKSFileSelector_clicked()
 {
     QString startDir = (ui->leLUKSFilePath->text().isEmpty()) ? "/" : ui->leLUKSFilePath->text();
 
-    QString file = QFileDialog::getOpenFileName(this, tr("Choose the password file"));
+    QString file = QFileDialog::getOpenFileName(this, tr("Choose the password file"), startDir);
 
     ui->leLUKSFilePath->setText(file);
 }

@@ -34,6 +34,7 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QTimer>
 #include <QDateTime>
 #include <QLocalSocket>
+#include <QScreen>
 
 #include "config.h"
 #include "ticonf.h"
@@ -52,7 +53,9 @@ MainWindow::MainWindow(QWidget *parent) :
     main_settings = new tiConfMain;
 
     // Center window on startup
-    QRect geom = QApplication::desktop()->availableGeometry();
+    QRect geom = QGuiApplication::screens()[0]->availableGeometry();
+    if(geom.width() > 2560 && geom.height() > 1440)
+        resize(geom.width() / 3, geom.height() / 3);
     move((geom.width() - width()) / 2, (geom.height() - height()) / 2);
 
     QStringList headers;
@@ -90,8 +93,8 @@ MainWindow::MainWindow(QWidget *parent) :
     refreshBackupJobList();
     updateServiceStatus();
 
-    if(getuid())
-        QMessageBox::information(this, "Superuser needed", "This program must run with superuser privileges to function properly.");
+    //if(getuid())
+    //    QMessageBox::information(this, "Superuser needed", "This program must run with superuser privileges to function properly.");
 }
 
 MainWindow::~MainWindow()
@@ -268,36 +271,17 @@ void MainWindow::on_btnStartManualBackup_clicked()
     ui->btnStartManualBackup->setDisabled(true);
     ui->statusBar->showMessage(tr("Backupjob <%1> was started...").arg(jobName));
 
-    // We will do this in a seperate thread
-    //tiConfBackupJobs jobss;
-    //tiBackupJob *job = jobss.getJobByName(jobName);
-    //job->startBackup();
-
-    /*
-    QThread* thread = new QThread;
-    tiBackupJobWorker* worker = new tiBackupJobWorker();
-    worker->setJobName(jobName);
-    worker->moveToThread(thread);
-    //connect(worker, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
-    connect(thread, SIGNAL(started()), worker, SLOT(process()));
-    connect(worker, SIGNAL(finished()), this, SLOT(onManualBackupFinished()));
-    connect(worker, SIGNAL(finished()), thread, SLOT(quit()));
-    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    thread->start();
-    */
-
     QLocalSocket *apiClient = new QLocalSocket(this);
     connect(apiClient, SIGNAL(disconnected()), this, SLOT(onManualBackupFinished()));
-    apiClient->connectToServer("tibackup");
+    apiClient->connectToServer(tibackup_config::api_sock_name);
     if(apiClient->waitForConnected(1000))
     {
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_4_0);
-        QHash<QString, QString> apiData;
-        apiData[tiBackupApi::API_VAR_CMD] = tiBackupApi::API_CMD_START;
-        apiData[tiBackupApi::API_VAR_BACKUPJOB] = jobName;
+        out.setVersion(QDataStream::Qt_5_9);
+        QHash<tiBackupApi::API_VAR, QString> apiData;
+        apiData[tiBackupApi::API_VAR::API_VAR_CMD] = tiBackupApi::API_CMD::API_CMD_START;
+        apiData[tiBackupApi::API_VAR::API_VAR_BACKUPJOB] = jobName;
         out << apiData;
 
         apiClient->write(block);

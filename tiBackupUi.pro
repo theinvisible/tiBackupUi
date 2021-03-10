@@ -44,4 +44,5 @@ RESOURCES += \
 
 DISTFILES += \
     .gitlab-ci.yml \
-    debian/changelog
+    debian/changelog \
+    debian/control
