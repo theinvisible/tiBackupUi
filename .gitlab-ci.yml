@@ -117,7 +117,7 @@ build-ubuntu-2004-64:
   stage: build
   script:
     - mkdir build
-    - sudo apt update && sudo apt install tibackuplib=$TIBACKUPLIB_DEV_RELEASE tibackuplib-dev=$TIBACKUPLIB_DEV_RELEASE -y
+    - sudo apt update && sudo apt install tibackuplib=$TIBACKUPLIB_DEV_RELEASE tibackuplib-dev=$TIBACKUPLIB_DEV_RELEASE -y --allow-downgrades
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
     - mv ../tibackupui_*.deb build/
@@ -140,7 +140,7 @@ build-ubuntu-1804-64:
   stage: build
   script:
     - mkdir build
-    - sudo apt update && sudo apt install tibackuplib=$TIBACKUPLIB_DEV_RELEASE tibackuplib-dev=$TIBACKUPLIB_DEV_RELEASE -y
+    - sudo apt update && sudo apt install tibackuplib=$TIBACKUPLIB_DEV_RELEASE tibackuplib-dev=$TIBACKUPLIB_DEV_RELEASE -y --allow-downgrades
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
     - mv ../tibackupui_*.deb build/
@@ -163,7 +163,7 @@ build-debian-9-64:
   stage: build
   script:
     - mkdir build
-    - sudo apt update && sudo apt install tibackuplib=$TIBACKUPLIB_DEV_RELEASE tibackuplib-dev=$TIBACKUPLIB_DEV_RELEASE -y
+    - sudo apt update && sudo apt install tibackuplib=$TIBACKUPLIB_DEV_RELEASE tibackuplib-dev=$TIBACKUPLIB_DEV_RELEASE -y --allow-downgrades
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
     - mv ../tibackupui_*.deb build/
@@ -186,7 +186,7 @@ build-debian-10-64:
   stage: build
   script:
     - mkdir build
-    - sudo apt update && sudo apt install tibackuplib=$TIBACKUPLIB_DEV_RELEASE tibackuplib-dev=$TIBACKUPLIB_DEV_RELEASE -y
+    - sudo apt update && sudo apt install tibackuplib=$TIBACKUPLIB_DEV_RELEASE tibackuplib-dev=$TIBACKUPLIB_DEV_RELEASE -y --allow-downgrades
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
     - mv ../tibackupui_*.deb build/
