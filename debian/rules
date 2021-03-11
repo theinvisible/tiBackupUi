@@ -12,4 +12,5 @@ override_dh_auto_install:
 	cp -a tiBackupUi-pkexec debian/tibackupui/usr/bin/.
 	cp -a policykit/net.iksdeh.pkexec.tibackupui.policy debian/tibackupui/usr/share/polkit-1/actions/.
 	cp -a app-entry/tibackupui.desktop debian/tibackupui/usr/share/applications/.
+        cp -a app-entry/tibackupui-admin.desktop debian/tibackupui/usr/share/applications/.
 	cp -a app-entry/tibackup.png debian/tibackupui/usr/share/pixmaps/.

@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
-Name=tiBackupUi
+Name=tiBackupUi (Admin)
 Comment=The admin backup assist
 Icon=/usr/share/pixmaps/tibackup.png
-Exec=/usr/bin/tiBackupUi
+Exec=/usr/bin/tiBackupUi-pkexec
 Terminal=false
 Categories=Network;Application;

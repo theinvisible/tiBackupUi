@@ -29,14 +29,8 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 
 QFile *tibackupLog = 0;
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 void logMessageOutput(QtMsgType type, const QMessageLogContext &, const QString & str)
 {
-    const char * msg = str.toStdString().c_str();
-#else
-void logMessageOutput(QtMsgType type, const char *msg)
-{
-#endif
     tiConfMain main_settings;
 
     if(tibackupLog == 0)
@@ -50,7 +44,6 @@ void logMessageOutput(QtMsgType type, const char *msg)
     QTextStream out(tibackupLog);
     QDateTime currentDate = QDateTime::currentDateTime();
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     switch (type) {
     case QtDebugMsg:
         if(tidebug == true)
@@ -70,24 +63,6 @@ void logMessageOutput(QtMsgType type, const char *msg)
         tibackupLog->flush();
         abort();
     }
-#else
-    switch (type) {
-    case QtDebugMsg:
-        if(tidebug == true)
-            out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Debug: " << QString::fromUtf8(msg).toStdString().c_str() << "\n";
-        break;
-    case QtWarningMsg:
-        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Warning: " << QString::fromUtf8(msg).toStdString().c_str() << "\n";
-        break;
-    case QtCriticalMsg:
-        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Critical: " << QString::fromUtf8(msg).toStdString().c_str() << "\n";
-        break;
-    case QtFatalMsg:
-        out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Fatal: " << QString::fromUtf8(msg).toStdString().c_str() << "\n";
-        tibackupLog->flush();
-        abort();
-    }
-#endif
 
     tibackupLog->flush();
 }

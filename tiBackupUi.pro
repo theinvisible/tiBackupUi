@@ -44,5 +44,7 @@ RESOURCES += \
 
 DISTFILES += \
     .gitlab-ci.yml \
+    app-entry/tibackupui.desktop \
     debian/changelog \
-    debian/control
+    debian/control \
+    debian/rules
