@@ -34,6 +34,7 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 
 #include "config.h"
 #include "tibackupapi.h"
+#include "ipcclient.h"
 
 #include "tools/scripteditor.h"
 
@@ -111,9 +112,8 @@ void tiBackupAdd::on_comboBackupDevice_currentIndexChanged(int index)
 
         ui->comboBackupPartition->insertItem(0, QString("%1 (%2)").arg(part.name, part.uuid), part.uuid);
     }
-    */
+
     QLocalSocket *apiClient = new QLocalSocket(this);
-    connect(apiClient, SIGNAL(disconnected()), this, SLOT(onManualBackupFinished()));
     apiClient->connectToServer(tibackup_config::api_sock_name);
     QList<DeviceDiskPartition> partitions;
     if(apiClient->waitForConnected(1000))
@@ -144,6 +144,10 @@ void tiBackupAdd::on_comboBackupDevice_currentIndexChanged(int index)
 
     apiClient->close();
     apiClient->disconnect();
+    */
+
+    ipcClient *client = ipcClient::instance();
+    QList<DeviceDiskPartition> partitions = client->getPartitionsForDevName(devname);
 
     for(int i=0; i < partitions.count(); i++)
     {
@@ -180,10 +184,12 @@ void tiBackupAdd::on_btnSelectDest_clicked()
     QString defaultPath = "/";
 
     qDebug() << "tiBackupAdd::on_btnSelectDest_clicked() -> selected part uuid:" << uuid;
-    DeviceDisk selDisk;
-    selDisk.devname = devname;
+    //DeviceDisk selDisk;
+    //selDisk.devname = devname;
 
-    DeviceDiskPartition part = selDisk.getPartitionByUUID(uuid);
+    //DeviceDiskPartition part = selDisk.getPartitionByUUID(uuid);
+    ipcClient *client = ipcClient::instance();
+    DeviceDiskPartition part = client->getPartitionByDevnameUUID(devname, uuid);
     ui->lblDriveType->setText(part.type);
 
     TiBackupLib lib;
@@ -270,10 +276,14 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
         job.scriptBeforeBackup = ui->leScriptPathBeforeBackup->text();
         job.scriptAfterBackup = ui->leScriptPathAfterBackup->text();
 
+        /*
         DeviceDisk selDisk;
         selDisk.devname = devname;
-
         DeviceDiskPartition part = selDisk.getPartitionByUUID(job.partition_uuid);
+        */
+        ipcClient *client = ipcClient::instance();
+        DeviceDiskPartition part = client->getPartitionByDevnameUUID(devname, job.partition_uuid);
+
         TiBackupLib lib;
 
         QHash<QString, QString> h;
@@ -380,7 +390,9 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
         QString dest;
         TiBackupLib lib;
         bool diskMounted = false;
-        DeviceDiskPartition part = TiBackupLib::getPartitionByUUID(getBackupPartitionValue());
+        //DeviceDiskPartition part = TiBackupLib::getPartitionByUUID(getBackupPartitionValue());
+        ipcClient *client = ipcClient::instance();
+        DeviceDiskPartition part = client->getPartitionByUUID(getBackupPartitionValue());
         if(lib.isMounted(&part))
             diskMounted = true;
 
@@ -552,7 +564,7 @@ void tiBackupAdd::updatePartitionInformation()
     selDisk.devname = devname;
     DeviceDiskPartition part = selDisk.getPartitionByUUID(uuid);
     ui->lblDriveType->setText(part.type);
-    */
+
 
     QLocalSocket *apiClient = new QLocalSocket(this);
     apiClient->connectToServer(tibackup_config::api_sock_name);
@@ -561,7 +573,7 @@ void tiBackupAdd::updatePartitionInformation()
     {
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_5_9);
+        out.setVersion(tibackup_config::ipc_version);
         QHash<tiBackupApi::API_VAR, QString> apiData;
         apiData[tiBackupApi::API_VAR::API_VAR_CMD] = tiBackupApi::API_CMD::API_CMD_DISK_GET_PARTITION_BY_UUID;
         apiData[tiBackupApi::API_VAR::API_VAR_DEVNAME] = devname;
@@ -574,7 +586,7 @@ void tiBackupAdd::updatePartitionInformation()
         apiClient->waitForReadyRead(5000);
 
         QDataStream in(apiClient);
-        in.setVersion(QDataStream::Qt_5_9);
+        in.setVersion(tibackup_config::ipc_version);
         in >> part;
     }
     else
@@ -586,6 +598,10 @@ void tiBackupAdd::updatePartitionInformation()
 
     apiClient->close();
     apiClient->disconnect();
+    */
+
+    ipcClient *client = ipcClient::instance();
+    DeviceDiskPartition part = client->getPartitionByDevnameUUID(devname, uuid);
 
     ui->lblDriveType->setText(part.type);
 
@@ -800,10 +816,46 @@ void tiBackupAdd::updateJobDetails()
         qDebug() << "tiBackupEdit::updateJobDetails() -> disk:" << disk.devname;
         if(disk.devtype == "disk")
         {
-            disk.readPartitions();
-            for(int j=0; j < disk.partitions.count(); j++)
+            /*
+            QLocalSocket *apiClient = new QLocalSocket(this);
+            apiClient->connectToServer(tibackup_config::api_sock_name);
+            QList<DeviceDiskPartition> partitions;
+            if(apiClient->waitForConnected(1000))
             {
-                DeviceDiskPartition part = disk.partitions.at(j);
+                QByteArray block;
+                QDataStream out(&block, QIODevice::WriteOnly);
+                out.setVersion(QDataStream::Qt_5_9);
+                QHash<tiBackupApi::API_VAR, QString> apiData;
+                apiData[tiBackupApi::API_VAR::API_VAR_CMD] = tiBackupApi::API_CMD::API_CMD_DISK_GET_PARTITIONS;
+                apiData[tiBackupApi::API_VAR::API_VAR_DEVNAME] = disk.devname;
+                out << apiData;
+
+                apiClient->write(block);
+                apiClient->flush();
+
+                apiClient->waitForReadyRead(5000);
+
+                QDataStream in(apiClient);
+                in.setVersion(QDataStream::Qt_5_9);
+                in >> partitions;
+            }
+            else
+            {
+                qWarning() << apiClient->errorString();
+                QMessageBox::warning(this, tr("Error when accessing API"),
+                                            tr("Check if your tiBackup service is running or try to restart."));
+            }
+
+            apiClient->close();
+            apiClient->disconnect();
+            */
+
+            ipcClient *client = ipcClient::instance();
+            QList<DeviceDiskPartition> partitions = client->getPartitionsForDevName(disk.devname);
+
+            for(int j=0; j < partitions.count(); j++)
+            {
+                DeviceDiskPartition part = partitions.at(j);
 
                 if(part.uuid.isEmpty())
                     continue;
@@ -814,11 +866,11 @@ void tiBackupAdd::updateJobDetails()
                     qDebug() << "tiBackupEdit::updateJobDetails() -> job disk is attached right now";
 
                     int devrow = ui->comboBackupDevice->findData(disk.devname);
-                    int partrow = ui->comboBackupPartition->findData(part.uuid);
-                    qDebug() << "tiBackupEdit::updateJobDetails() -> devrow::" << devrow << "::partrow::" << partrow;
-
                     ui->comboBackupDevice->setCurrentIndex(devrow);
+
+                    int partrow = ui->comboBackupPartition->findData(part.uuid);
                     ui->comboBackupPartition->setCurrentIndex(partrow);
+                    qDebug() << "tiBackupEdit::updateJobDetails() -> devrow::" << devrow << "::partrow::" << partrow;
 
                     currentJobDiskisAttached = true;
 

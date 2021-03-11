@@ -3,7 +3,7 @@ stages:
   - build
 
 variables:
-  TIBACKUPLIB_DEV_RELEASE: "0.6.2-1"
+  TIBACKUPLIB_DEV_RELEASE: "0.6.2-2"
 
 .build_template: &build_template_def
   before_script:
@@ -22,7 +22,7 @@ build-ubuntu-2004-64-dev:
   stage: build
   script:
     - mkdir build
-    - sudo apt update && sudo apt install tibackuplib-dev -y
+    - sudo apt update && sudo apt install tibackuplib tibackuplib-dev -y
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
     - mv ../tibackupui_*.deb build/
@@ -46,7 +46,7 @@ build-ubuntu-1804-64-dev:
   stage: build
   script:
     - mkdir build
-    - sudo apt update && sudo apt install tibackuplib-dev -y
+    - sudo apt update && sudo apt install tibackuplib tibackuplib-dev -y
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
     - mv ../tibackupui_*.deb build/
@@ -70,7 +70,7 @@ build-debian-10-64-dev:
   stage: build
   script:
     - mkdir build
-    - sudo apt update && sudo apt install tibackuplib-dev -y
+    - sudo apt update && sudo apt install tibackuplib tibackuplib-dev -y
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
     - mv ../tibackupui_*.deb build/
@@ -94,7 +94,7 @@ build-debian-9-64-dev:
   stage: build
   script:
     - mkdir build
-    - sudo apt update && sudo apt install tibackuplib-dev -y
+    - sudo apt update && sudo apt install tibackuplib tibackuplib-dev -y
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
     - mv ../tibackupui_*.deb build/

@@ -40,6 +40,7 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include "ticonf.h"
 #include "tibackupapi.h"
 #include "workers/tibackupjobworker.h"
+#include "ipcclient.h"
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -268,9 +269,13 @@ void MainWindow::on_btnStartManualBackup_clicked()
     }
 
     QString jobName = model->itemFromIndex(sellist.at(0))->text();
-    ui->btnStartManualBackup->setDisabled(true);
-    ui->statusBar->showMessage(tr("Backupjob <%1> was started...").arg(jobName));
+    //ui->btnStartManualBackup->setDisabled(true);
+    //ui->statusBar->showMessage(tr("Backupjob <%1> was started...").arg(jobName));
 
+    ipcClient *client = ipcClient::instance();
+    client->startBackup(jobName);
+
+    /*
     QLocalSocket *apiClient = new QLocalSocket(this);
     connect(apiClient, SIGNAL(disconnected()), this, SLOT(onManualBackupFinished()));
     apiClient->connectToServer(tibackup_config::api_sock_name);
@@ -278,7 +283,7 @@ void MainWindow::on_btnStartManualBackup_clicked()
     {
         QByteArray block;
         QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_5_9);
+        out.setVersion(tibackup_config::ipc_version);
         QHash<tiBackupApi::API_VAR, QString> apiData;
         apiData[tiBackupApi::API_VAR::API_VAR_CMD] = tiBackupApi::API_CMD::API_CMD_START;
         apiData[tiBackupApi::API_VAR::API_VAR_BACKUPJOB] = jobName;
@@ -298,6 +303,7 @@ void MainWindow::on_btnStartManualBackup_clicked()
 
     apiClient->close();
     apiClient->disconnect();
+    */
 }
 
 void MainWindow::ontiBackupLogChanged(__attribute__ ((unused)) const QString &path)
