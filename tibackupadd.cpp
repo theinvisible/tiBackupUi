@@ -785,6 +785,32 @@ void tiBackupAdd::on_btnPBSConnect_clicked()
     tiConfPBServers *ticonfpbs = tiConfPBServers::instance();
     ticonfpbs->readItems();
     PBServer *pb = ticonfpbs->getItemByUuid(selPBServer);
+    ui->comboPBSDatastore->clear();
+
+    pbsClient *pbs = pbsClient::instance();
+    HttpStatus::Code status = pbs->auth(pb->host, pb->port, pb->username, pb->password);
+    if(status == HttpStatus::Code::OK)
+    {
+        pbsClient::HttpResponse resp = pbs->getDatastores();
+        if(resp.status == HttpStatus::Code::OK)
+        {
+            QJsonArray datastores = resp.data.object()["data"].toArray();
+            for(int i=0; i < datastores.size(); i++)
+            {
+                QJsonObject datastore = datastores[i].toObject();
+                ui->comboPBSDatastore->insertItem(0, QString("%1 - %2").arg(datastore["store"].toString(), datastore["comment"].toString()), datastore["store"].toString());
+            }
+        }
+    }
+}
+
+void tiBackupAdd::on_comboPBSDatastore_currentIndexChanged(int index)
+{
+    QString selPBServer = ui->comboPBServer->itemData(ui->comboPBServer->currentIndex()).toString();
+    QString selPBSDatastore = ui->comboPBSDatastore->itemData(index).toString();
+    tiConfPBServers *ticonfpbs = tiConfPBServers::instance();
+    ticonfpbs->readItems();
+    PBServer *pb = ticonfpbs->getItemByUuid(selPBServer);
 
     QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvPBServer->model());
     model->removeRows(0, model->rowCount());
@@ -798,13 +824,9 @@ void tiBackupAdd::on_btnPBSConnect_clicked()
 
     pbsClient *pbs = pbsClient::instance();
     HttpStatus::Code status = pbs->auth(pb->host, pb->port, pb->username, pb->password);
-    pbsClient::HttpResponse resp = pbs->getDatastores();
-    qInfo() << "datastores" << resp.status << resp.data;
-    if(resp.status == HttpStatus::Code::OK)
+    if(status == HttpStatus::Code::OK)
     {
-        QString store = resp.data.object()["data"].toArray()[0].toObject()["store"].toString();
-        resp = pbs->getDatastoreGroups(store);
-
+        pbsClient::HttpResponse resp = pbs->getDatastoreGroups(selPBSDatastore);
         if(resp.status == HttpStatus::Code::OK)
         {
             QJsonArray groups = resp.data.object()["data"].toArray();
@@ -819,7 +841,7 @@ void tiBackupAdd::on_btnPBSConnect_clicked()
                 else if(group["backup-type"].toString() == "ct")
                     file = "pct.conf.blob";
 
-                pbsClient::HttpResponseRaw resp2 = pbs->getBackupFile(store, group["backup-id"].toString(), group["last-backup"].toInt(), group["backup-type"].toString(), file);
+                pbsClient::HttpResponseRaw resp2 = pbs->getBackupFile(selPBSDatastore, group["backup-id"].toString(), group["last-backup"].toInt(), group["backup-type"].toString(), file);
                 qInfo() << "qemuserverdata::" << resp2.data;
 
                 item = new QStandardItem("Name");

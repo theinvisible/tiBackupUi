@@ -71,6 +71,8 @@ private slots:
 
     void on_btnPBSConnect_clicked();
 
+    void on_comboPBSDatastore_currentIndexChanged(int index);
+
 signals:
     void jobAdded(tiBackupJob job);
     void jobEdited(tiBackupJob job);
