@@ -32,6 +32,7 @@ QFile *tibackupLog = 0;
 void logMessageOutput(QtMsgType type, const QMessageLogContext &, const QString & str)
 {
     tiConfMain main_settings;
+    QTextStream sout(stdout);
 
     if(tibackupLog == 0)
     {
@@ -44,6 +45,8 @@ void logMessageOutput(QtMsgType type, const QMessageLogContext &, const QString 
     QTextStream out(tibackupLog);
     QDateTime currentDate = QDateTime::currentDateTime();
 
+    sout << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " openfortiGUI::Info: " << str << "\n";
+
     switch (type) {
     case QtDebugMsg:
         if(tidebug == true)
@@ -51,6 +54,7 @@ void logMessageOutput(QtMsgType type, const QMessageLogContext &, const QString 
         break;
     case QtInfoMsg:
         out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Info: " << str << "\n";
+
         break;
     case QtWarningMsg:
         out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Warning: " << str << "\n";

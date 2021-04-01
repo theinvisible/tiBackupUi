@@ -35,12 +35,17 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QDateTime>
 #include <QLocalSocket>
 #include <QScreen>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 #include "config.h"
 #include "ticonf.h"
 #include "tibackupapi.h"
 #include "workers/tibackupjobworker.h"
 #include "ipcclient.h"
+#include "pbsclient.h"
+#include "tools/pbsmanager.h"
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -70,11 +75,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(onActionAbout()));
     connect(ui->actionAddBackupjob, SIGNAL(triggered()), this, SLOT(on_btnAddBackup_clicked()));
     connect(ui->actionPreferences, SIGNAL(triggered()), this, SLOT(onActionPreferences()));
+    connect(ui->actionPBSManager, &QAction::triggered, this, &MainWindow::onActionPBSManager);
 
     tiConfMain main_settings;
     QFileSystemWatcher *fileWatcher = new QFileSystemWatcher(this);
     fileWatcher->addPath(QString("%1/tibackup.log").arg(main_settings.getValue("paths/logs").toString()));
     connect(fileWatcher, SIGNAL(fileChanged(QString)), this, SLOT(ontiBackupLogChanged(QString)));
+    ontiBackupLogChanged("");
 
     lblTime = new QLabel(this);
     ui->statusBar->addPermanentWidget(lblTime);
@@ -94,8 +101,37 @@ MainWindow::MainWindow(QWidget *parent) :
     refreshBackupJobList();
     updateServiceStatus();
 
-    //if(getuid())
-    //    QMessageBox::information(this, "Superuser needed", "This program must run with superuser privileges to function properly.");
+    // Test PBS
+    /*
+    pbsClient *pbs = pbsClient::instance();
+    HttpStatus::Code status = pbs->auth("srv-backup01.iteas.at", "extapi@pbs", "ENJfrZvftIIQ8t2Sotii");
+    pbsClient::HttpResponse resp = pbs->getDatastores();
+    qInfo() << "datastores" << resp.status << resp.data;
+    if(resp.status == HttpStatus::Code::OK)
+    {
+        QString store = resp.data.object()["data"].toArray()[0].toObject()["store"].toString();
+        resp = pbs->getDatastoreGroups(store);
+
+        if(resp.status == HttpStatus::Code::OK)
+        {
+            QJsonArray groups = resp.data.object()["data"].toArray();
+            for(int i=0; i < groups.size(); i++)
+            {
+                QJsonObject group = groups[i].toObject();
+                qInfo() << "group" << group;
+
+                QString file = "";
+                if(group["backup-type"].toString() == "vm")
+                    file = "qemu-server.conf.blob";
+                else if(group["backup-type"].toString() == "ct")
+                    file = "pct.conf.blob";
+
+                pbsClient::HttpResponseRaw resp2 = pbs->getBackupFile(store, group["backup-id"].toString(), group["last-backup"].toInt(), group["backup-type"].toString(), file);
+                qInfo() << "qemuserverdata::" << resp2.data;
+            }
+        }
+    }
+    */
 }
 
 MainWindow::~MainWindow()
@@ -255,6 +291,12 @@ void MainWindow::onActionPreferences()
     prefWindow->setWindowTitle(windowTitle() + QObject::tr(" - Preferences"));
 
     prefWindow->show();
+}
+
+void MainWindow::onActionPBSManager()
+{
+    PBSManager *d = new PBSManager(this);
+    d->show();
 }
 
 void MainWindow::on_btnStartManualBackup_clicked()

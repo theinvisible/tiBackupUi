@@ -117,6 +117,12 @@
               </item>
               <item>
                <widget class="QPushButton" name="btnRefreshDevices">
+                <property name="minimumSize">
+                 <size>
+                  <width>16</width>
+                  <height>16</height>
+                 </size>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>16</width>
@@ -127,7 +133,7 @@
                  <string/>
                 </property>
                 <property name="icon">
-                 <iconset resource="resui.qrc">
+                 <iconset theme="view-refresh" resource="resui.qrc">
                   <normaloff>:/images/refresh-icon</normaloff>:/images/refresh-icon</iconset>
                 </property>
                 <property name="flat">
@@ -142,6 +148,105 @@
          </layout>
         </widget>
        </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>Backupoptions</string>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="1">
+             <widget class="QCheckBox" name="cbBackupOnHotplug">
+              <property name="text">
+               <string>Start backup by hotplug event</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QCheckBox" name="cbDeleteAddFilesOnDest">
+              <property name="text">
+               <string>Delete spare files</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QCheckBox" name="cbSaveLog">
+              <property name="text">
+               <string>Save logs</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QCheckBox" name="cbCompareViaChecksum">
+              <property name="text">
+               <string>Checksum file comparison</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="gbNotify">
+         <property name="title">
+          <string>Notification</string>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <layout class="QFormLayout" name="formLayout_2">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_9">
+              <property name="minimumSize">
+               <size>
+                <width>300</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>eMail-Addresses</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="leNotifyRecipients"/>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_5">
+      <attribute name="title">
+       <string>Backup</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_15">
        <item>
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
@@ -249,78 +354,55 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_3">
+        <widget class="QGroupBox" name="groupBox_8">
          <property name="title">
-          <string>Backupoptions</string>
+          <string>Proxmox Backup Server</string>
          </property>
-         <property name="checkable">
-          <bool>false</bool>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
+         <layout class="QVBoxLayout" name="verticalLayout_16">
           <item>
-           <layout class="QGridLayout" name="gridLayout">
-            <item row="0" column="1">
-             <widget class="QCheckBox" name="cbBackupOnHotplug">
-              <property name="text">
-               <string>Start backup by hotplug event</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QCheckBox" name="cbDeleteAddFilesOnDest">
-              <property name="text">
-               <string>Delete spare files</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QCheckBox" name="cbSaveLog">
-              <property name="text">
-               <string>Save logs</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QCheckBox" name="cbCompareViaChecksum">
-              <property name="text">
-               <string>Checksum file comparison</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <widget class="QTreeView" name="tvBackupFolders_2">
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
+            <property name="indentation">
+             <number>5</number>
+            </property>
+            <property name="rootIsDecorated">
+             <bool>false</bool>
+            </property>
+           </widget>
           </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QGroupBox" name="gbNotify">
-         <property name="title">
-          <string>Notification</string>
-         </property>
-         <property name="flat">
-          <bool>false</bool>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
-           <layout class="QFormLayout" name="formLayout_2">
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_9">
-              <property name="minimumSize">
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <item>
+             <widget class="QComboBox" name="comboPBServer"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnPBSConnect">
+              <property name="text">
+               <string>Connect</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
                <size>
-                <width>300</width>
-                <height>0</height>
+                <width>40</width>
+                <height>20</height>
                </size>
               </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnPBSManage">
               <property name="text">
-               <string>eMail-Addresses</string>
+               <string>Manage PBS</string>
               </property>
              </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="leNotifyRecipients"/>
             </item>
            </layout>
           </item>

@@ -55,6 +55,7 @@ private slots:
     void on_tvAvailBackupJobs_doubleClicked(const QModelIndex &index);
 
     void onActionPreferences();
+    void onActionPBSManager();
 
     void on_btnStartManualBackup_clicked();
 

@@ -182,7 +182,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -190,6 +190,7 @@
      <string>File</string>
     </property>
     <addaction name="actionPreferences"/>
+    <addaction name="actionPBSManager"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -228,6 +229,11 @@
   <action name="actionPreferences">
    <property name="text">
     <string>Preferences</string>
+   </property>
+  </action>
+  <action name="actionPBSManager">
+   <property name="text">
+    <string>PBS-Manager</string>
    </property>
   </action>
  </widget>

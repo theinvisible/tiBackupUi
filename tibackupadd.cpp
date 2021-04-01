@@ -37,6 +37,7 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include "ipcclient.h"
 
 #include "tools/scripteditor.h"
+#include "tools/pbsmanager.h"
 
 tiBackupAdd::tiBackupAdd(tiBackupAddMode mode, tiBackupJob *job, QWidget *parent) :
     QWidget(parent),
@@ -879,4 +880,11 @@ void tiBackupAdd::updateJobDetails()
             }
         }
     }
+}
+
+void tiBackupAdd::on_btnPBSManage_clicked()
+{
+    PBSManager *d = new PBSManager(this);
+    //connect(d, &PBSManager::form_finished, this, [=]() { loadData(); });
+    d->show();
 }

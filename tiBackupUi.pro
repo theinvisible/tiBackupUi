@@ -16,18 +16,24 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     tibackupadd.cpp \
     tipreferences.cpp \
+    tools/pbseditor.cpp \
+    tools/pbsmanager.cpp \
     tools/scripteditor.cpp \
     tools/taskplaner.cpp
 
 HEADERS  += mainwindow.h \
     tibackupadd.h \
     tipreferences.h \
+    tools/pbseditor.h \
+    tools/pbsmanager.h \
     tools/scripteditor.h \
     tools/taskplaner.h
 
 FORMS    += mainwindow.ui \
     tibackupadd.ui \
     tipreferences.ui \
+    tools/pbseditor.ui \
+    tools/pbsmanager.ui \
     tools/scripteditor.ui \
     tools/taskplaner.ui
 
