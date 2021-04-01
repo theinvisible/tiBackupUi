@@ -100,38 +100,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     refreshBackupJobList();
     updateServiceStatus();
-
-    // Test PBS
-    /*
-    pbsClient *pbs = pbsClient::instance();
-    HttpStatus::Code status = pbs->auth("srv-backup01.iteas.at", "extapi@pbs", "ENJfrZvftIIQ8t2Sotii");
-    pbsClient::HttpResponse resp = pbs->getDatastores();
-    qInfo() << "datastores" << resp.status << resp.data;
-    if(resp.status == HttpStatus::Code::OK)
-    {
-        QString store = resp.data.object()["data"].toArray()[0].toObject()["store"].toString();
-        resp = pbs->getDatastoreGroups(store);
-
-        if(resp.status == HttpStatus::Code::OK)
-        {
-            QJsonArray groups = resp.data.object()["data"].toArray();
-            for(int i=0; i < groups.size(); i++)
-            {
-                QJsonObject group = groups[i].toObject();
-                qInfo() << "group" << group;
-
-                QString file = "";
-                if(group["backup-type"].toString() == "vm")
-                    file = "qemu-server.conf.blob";
-                else if(group["backup-type"].toString() == "ct")
-                    file = "pct.conf.blob";
-
-                pbsClient::HttpResponseRaw resp2 = pbs->getBackupFile(store, group["backup-id"].toString(), group["last-backup"].toInt(), group["backup-type"].toString(), file);
-                qInfo() << "qemuserverdata::" << resp2.data;
-            }
-        }
-    }
-    */
 }
 
 MainWindow::~MainWindow()

@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -360,7 +360,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_16">
           <item>
-           <widget class="QTreeView" name="tvBackupFolders_2">
+           <widget class="QTreeView" name="tvPBServer">
             <property name="selectionBehavior">
              <enum>QAbstractItemView::SelectRows</enum>
             </property>

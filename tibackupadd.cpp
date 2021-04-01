@@ -31,10 +31,13 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QMainWindow>
 #include <QDateTime>
 #include <QLocalSocket>
+#include <QJsonObject>
+#include <QJsonArray>
 
 #include "config.h"
 #include "tibackupapi.h"
 #include "ipcclient.h"
+#include "pbsclient.h"
 
 #include "tools/scripteditor.h"
 #include "tools/pbsmanager.h"
@@ -48,6 +51,17 @@ tiBackupAdd::tiBackupAdd(tiBackupAddMode mode, tiBackupJob *job, QWidget *parent
 
     ui->btnPartitionMount->setDisabled(true);
 
+    QStringList headers;
+    headers << tr("Name") << tr("Backup ID") << tr("Backup Type") << tr("Last backup") << tr("Backup count");
+    QStandardItemModel *model = new QStandardItemModel(ui->tvPBServer);
+    model->setHorizontalHeaderLabels(headers);
+    ui->tvPBServer->setModel(model);
+    ui->tvPBServer->sortByColumn(0, Qt::AscendingOrder);
+
+    ui->tvPBServer->header()->resizeSection(0, 250);
+    ui->tvPBServer->header()->resizeSection(1, 80);
+    updatePBServers();
+
     if(formmode == tiBackupAddModeAdd)
     {
         refreshBackupDevices();
@@ -55,7 +69,7 @@ tiBackupAdd::tiBackupAdd(tiBackupAddMode mode, tiBackupJob *job, QWidget *parent
         parent->installEventFilter(this);
 
         QStringList headers;
-        headers << "Quellordner" << "Zielordner";
+        headers << "Source" << "Destination";
 
         QStandardItemModel *model = new QStandardItemModel(ui->tvBackupFolders);
         model->setHorizontalHeaderLabels(headers);
@@ -72,7 +86,7 @@ tiBackupAdd::tiBackupAdd(tiBackupAddMode mode, tiBackupJob *job, QWidget *parent
         parent->installEventFilter(this);
 
         QStringList headers;
-        headers << "Quellordner" << "Zielordner";
+        headers << "Source" << "Destination";
 
         QStandardItemModel *model = new QStandardItemModel(ui->tvBackupFolders);
         model->setHorizontalHeaderLabels(headers);
@@ -100,52 +114,6 @@ void tiBackupAdd::on_comboBackupDevice_currentIndexChanged(int index)
     ui->comboBackupPartition->clear();
 
     qDebug() << "tiBackupAdd::on_comboBackupDevice_currentIndexChanged() -> selected dev2:" << devname;
-    /*
-    DeviceDisk selDisk;
-    selDisk.devname = devname;
-    selDisk.readPartitions();
-    for(int i=0; i < selDisk.partitions.count(); i++)
-    {
-        DeviceDiskPartition part = selDisk.partitions.at(i);
-
-        if(part.uuid.isEmpty())
-            continue;
-
-        ui->comboBackupPartition->insertItem(0, QString("%1 (%2)").arg(part.name, part.uuid), part.uuid);
-    }
-
-    QLocalSocket *apiClient = new QLocalSocket(this);
-    apiClient->connectToServer(tibackup_config::api_sock_name);
-    QList<DeviceDiskPartition> partitions;
-    if(apiClient->waitForConnected(1000))
-    {
-        QByteArray block;
-        QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_5_9);
-        QHash<tiBackupApi::API_VAR, QString> apiData;
-        apiData[tiBackupApi::API_VAR::API_VAR_CMD] = tiBackupApi::API_CMD::API_CMD_DISK_GET_PARTITIONS;
-        apiData[tiBackupApi::API_VAR::API_VAR_DEVNAME] = devname;
-        out << apiData;
-
-        apiClient->write(block);
-        apiClient->flush();
-
-        apiClient->waitForReadyRead(5000);
-
-        QDataStream in(apiClient);
-        in.setVersion(QDataStream::Qt_5_9);
-        in >> partitions;
-    }
-    else
-    {
-        qWarning() << apiClient->errorString();
-        QMessageBox::warning(this, tr("Error when accessing API"),
-                                    tr("Check if your tiBackup service is running or try to restart."));
-    }
-
-    apiClient->close();
-    apiClient->disconnect();
-    */
 
     ipcClient *client = ipcClient::instance();
     QList<DeviceDiskPartition> partitions = client->getPartitionsForDevName(devname);
@@ -506,22 +474,6 @@ bool tiBackupAdd::eventFilter(QObject *object, QEvent *event)
 {
     if(object == parentWidget() && event->type() == QEvent::Close)
     {
-        /*
-        int ret = QMessageBox::warning(this, QString::fromUtf8("Fenster schließen"),
-                                    QString::fromUtf8("Alle Änderungen gehen verloren. Fortfahren?"),
-                                    QMessageBox::Yes | QMessageBox::No);
-
-        switch(ret)
-        {
-        case QMessageBox::Yes:
-            return false;
-        case QMessageBox::No:
-        default:
-            event->ignore();
-            return true;
-        }
-        */
-
         return false;
     }
 
@@ -559,47 +511,6 @@ void tiBackupAdd::updatePartitionInformation()
     QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
     QString uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
     qDebug() << "tiBackupAdd::updatePartitionInformation() -> selected part uuid:" << uuid;
-
-    /*
-    DeviceDisk selDisk;
-    selDisk.devname = devname;
-    DeviceDiskPartition part = selDisk.getPartitionByUUID(uuid);
-    ui->lblDriveType->setText(part.type);
-
-
-    QLocalSocket *apiClient = new QLocalSocket(this);
-    apiClient->connectToServer(tibackup_config::api_sock_name);
-    DeviceDiskPartition part;
-    if(apiClient->waitForConnected(1000))
-    {
-        QByteArray block;
-        QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(tibackup_config::ipc_version);
-        QHash<tiBackupApi::API_VAR, QString> apiData;
-        apiData[tiBackupApi::API_VAR::API_VAR_CMD] = tiBackupApi::API_CMD::API_CMD_DISK_GET_PARTITION_BY_UUID;
-        apiData[tiBackupApi::API_VAR::API_VAR_DEVNAME] = devname;
-        apiData[tiBackupApi::API_VAR::API_VAR_PART_UUID] = uuid;
-        out << apiData;
-
-        apiClient->write(block);
-        apiClient->flush();
-
-        apiClient->waitForReadyRead(5000);
-
-        QDataStream in(apiClient);
-        in.setVersion(tibackup_config::ipc_version);
-        in >> part;
-    }
-    else
-    {
-        qWarning() << apiClient->errorString();
-        QMessageBox::warning(this, tr("Error when accessing API"),
-                                    tr("Check if your tiBackup service is running or try to restart."));
-    }
-
-    apiClient->close();
-    apiClient->disconnect();
-    */
 
     ipcClient *client = ipcClient::instance();
     DeviceDiskPartition part = client->getPartitionByDevnameUUID(devname, uuid);
@@ -817,40 +728,6 @@ void tiBackupAdd::updateJobDetails()
         qDebug() << "tiBackupEdit::updateJobDetails() -> disk:" << disk.devname;
         if(disk.devtype == "disk")
         {
-            /*
-            QLocalSocket *apiClient = new QLocalSocket(this);
-            apiClient->connectToServer(tibackup_config::api_sock_name);
-            QList<DeviceDiskPartition> partitions;
-            if(apiClient->waitForConnected(1000))
-            {
-                QByteArray block;
-                QDataStream out(&block, QIODevice::WriteOnly);
-                out.setVersion(QDataStream::Qt_5_9);
-                QHash<tiBackupApi::API_VAR, QString> apiData;
-                apiData[tiBackupApi::API_VAR::API_VAR_CMD] = tiBackupApi::API_CMD::API_CMD_DISK_GET_PARTITIONS;
-                apiData[tiBackupApi::API_VAR::API_VAR_DEVNAME] = disk.devname;
-                out << apiData;
-
-                apiClient->write(block);
-                apiClient->flush();
-
-                apiClient->waitForReadyRead(5000);
-
-                QDataStream in(apiClient);
-                in.setVersion(QDataStream::Qt_5_9);
-                in >> partitions;
-            }
-            else
-            {
-                qWarning() << apiClient->errorString();
-                QMessageBox::warning(this, tr("Error when accessing API"),
-                                            tr("Check if your tiBackup service is running or try to restart."));
-            }
-
-            apiClient->close();
-            apiClient->disconnect();
-            */
-
             ipcClient *client = ipcClient::instance();
             QList<DeviceDiskPartition> partitions = client->getPartitionsForDevName(disk.devname);
 
@@ -885,6 +762,83 @@ void tiBackupAdd::updateJobDetails()
 void tiBackupAdd::on_btnPBSManage_clicked()
 {
     PBSManager *d = new PBSManager(this);
-    //connect(d, &PBSManager::form_finished, this, [=]() { loadData(); });
+    connect(d, &PBSManager::form_finished, this, [=]() { updatePBServers(); });
     d->show();
+}
+
+void tiBackupAdd::updatePBServers()
+{
+    tiConfPBServers *ticonfpbs = tiConfPBServers::instance();
+    ticonfpbs->readItems();
+    ui->comboPBServer->clear();
+    QList<PBServer*> pbs = ticonfpbs->getItems();
+    for(int i=0; i < pbs.count(); i++)
+    {
+        PBServer *pb = pbs.at(i);
+        ui->comboPBServer->insertItem(0, QString("%1 - %2").arg(pb->name, pb->host), pb->uuid);
+    }
+}
+
+void tiBackupAdd::on_btnPBSConnect_clicked()
+{
+    QString selPBServer = ui->comboPBServer->itemData(ui->comboPBServer->currentIndex()).toString();
+    tiConfPBServers *ticonfpbs = tiConfPBServers::instance();
+    ticonfpbs->readItems();
+    PBServer *pb = ticonfpbs->getItemByUuid(selPBServer);
+
+    QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvPBServer->model());
+    model->removeRows(0, model->rowCount());
+    int row = model->rowCount();
+
+    QStandardItem *item = 0;
+    QStandardItem *item2 = 0;
+    QStandardItem *item3 = 0;
+    QStandardItem *item4 = 0;
+    QStandardItem *item5 = 0;
+
+    pbsClient *pbs = pbsClient::instance();
+    HttpStatus::Code status = pbs->auth(pb->host, pb->port, pb->username, pb->password);
+    pbsClient::HttpResponse resp = pbs->getDatastores();
+    qInfo() << "datastores" << resp.status << resp.data;
+    if(resp.status == HttpStatus::Code::OK)
+    {
+        QString store = resp.data.object()["data"].toArray()[0].toObject()["store"].toString();
+        resp = pbs->getDatastoreGroups(store);
+
+        if(resp.status == HttpStatus::Code::OK)
+        {
+            QJsonArray groups = resp.data.object()["data"].toArray();
+            for(int i=0; i < groups.size(); i++)
+            {
+                QJsonObject group = groups[i].toObject();
+                qInfo() << "group" << group;
+
+                QString file = "";
+                if(group["backup-type"].toString() == "vm")
+                    file = "qemu-server.conf.blob";
+                else if(group["backup-type"].toString() == "ct")
+                    file = "pct.conf.blob";
+
+                pbsClient::HttpResponseRaw resp2 = pbs->getBackupFile(store, group["backup-id"].toString(), group["last-backup"].toInt(), group["backup-type"].toString(), file);
+                qInfo() << "qemuserverdata::" << resp2.data;
+
+                item = new QStandardItem("Name");
+                item->setCheckable(true);
+                item2 = new QStandardItem(group["backup-id"].toString());
+                item3 = new QStandardItem(group["backup-type"].toString());
+                item4 = new QStandardItem(QString::number(group["last-backup"].toInt()));
+                item5 = new QStandardItem(QString::number(group["backup-count"].toInt()));
+
+                row = model->rowCount();
+                model->setItem(row, 0, item);
+                model->setItem(row, 1, item2);
+                model->setItem(row, 2, item3);
+                model->setItem(row, 3, item4);
+                model->setItem(row, 4, item5);
+            }
+        }
+    }
+
+    ui->tvPBServer->setSortingEnabled(true);
+    ui->tvPBServer->sortByColumn(1, Qt::AscendingOrder);
 }

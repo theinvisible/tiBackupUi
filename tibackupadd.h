@@ -67,6 +67,9 @@ private slots:
     void on_btnLUKSFileSelector_clicked();
 
     void on_btnPBSManage_clicked();
+    void updatePBServers();
+
+    void on_btnPBSConnect_clicked();
 
 signals:
     void jobAdded(tiBackupJob job);
