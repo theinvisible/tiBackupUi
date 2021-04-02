@@ -52,7 +52,7 @@ tiBackupAdd::tiBackupAdd(tiBackupAddMode mode, tiBackupJob *job, QWidget *parent
     ui->btnPartitionMount->setDisabled(true);
 
     QStringList headers;
-    headers << tr("Name") << tr("Backup ID") << tr("Backup Type") << tr("Last backup") << tr("Backup count");
+    headers << tr("Name") << tr("Backup ID") << tr("Backup Type") << tr("Last backup") << tr("Backup count") << tr("Size");
     QStandardItemModel *model = new QStandardItemModel(ui->tvPBServer);
     model->setHorizontalHeaderLabels(headers);
     ui->tvPBServer->setModel(model);
@@ -60,6 +60,7 @@ tiBackupAdd::tiBackupAdd(tiBackupAddMode mode, tiBackupJob *job, QWidget *parent
 
     ui->tvPBServer->header()->resizeSection(0, 250);
     ui->tvPBServer->header()->resizeSection(1, 80);
+    ui->tvPBServer->header()->resizeSection(3, 150);
     updatePBServers();
 
     if(formmode == tiBackupAddModeAdd)
@@ -777,6 +778,16 @@ void tiBackupAdd::updatePBServers()
         PBServer *pb = pbs.at(i);
         ui->comboPBServer->insertItem(0, QString("%1 - %2").arg(pb->name, pb->host), pb->uuid);
     }
+
+    if(pbs.count() == 0)
+    {
+        ui->comboPBServer->insertItem(0, tr("No PBS defined!"));
+        ui->btnPBSConnect->setDisabled(true);
+    }
+    else
+    {
+        ui->btnPBSConnect->setEnabled(true);
+    }
 }
 
 void tiBackupAdd::on_btnPBSConnect_clicked()
@@ -833,22 +844,51 @@ void tiBackupAdd::on_comboPBSDatastore_currentIndexChanged(int index)
             for(int i=0; i < groups.size(); i++)
             {
                 QJsonObject group = groups[i].toObject();
-                qInfo() << "group" << group;
 
-                QString file = "";
-                if(group["backup-type"].toString() == "vm")
+
+                QString file = "", infoword = "", infoval = "";
+                QString btype = group["backup-type"].toString();
+                QString bid = group["backup-id"].toString();
+                int blastbackup = group["last-backup"].toInt();
+                QString lastbackupstr = QDateTime::fromSecsSinceEpoch(blastbackup).toString("dd.MM.yyyy hh:mm");
+
+                if(btype == "vm") {
                     file = "qemu-server.conf.blob";
-                else if(group["backup-type"].toString() == "ct")
+                    infoword = "name:";
+                } else if(btype == "ct") {
                     file = "pct.conf.blob";
+                    infoword = "hostname:";
+                } else {
+                    infoval = QString("%1/%2/%3").arg(btype, bid).arg(blastbackup);
+                }
 
-                pbsClient::HttpResponseRaw resp2 = pbs->getBackupFile(selPBSDatastore, group["backup-id"].toString(), group["last-backup"].toInt(), group["backup-type"].toString(), file);
-                qInfo() << "qemuserverdata::" << resp2.data;
+                if(!file.isEmpty())
+                {
+                    pbsClient::HttpResponseRaw resp2 = pbs->getBackupFile(selPBSDatastore, bid, blastbackup, btype, file);
+                    if(resp2.status == HttpStatus::Code::OK)
+                    {
+                        QStringList conf = QString(resp2.data).split("\n");
+                        qInfo() << conf;
+                        for(int j=0; j < conf.size(); j++)
+                        {
+                            QString line = conf.at(j);
+                            if(line.startsWith(infoword))
+                            {
+                                QStringList lpart = line.split(":");
+                                qInfo() << "lpart" << lpart;
+                                infoval = lpart[1].trimmed();
+                                break;
+                            }
+                        }
+                    }
+                }
 
-                item = new QStandardItem("Name");
+                item = new QStandardItem(infoval);
                 item->setCheckable(true);
-                item2 = new QStandardItem(group["backup-id"].toString());
-                item3 = new QStandardItem(group["backup-type"].toString());
-                item4 = new QStandardItem(QString::number(group["last-backup"].toInt()));
+                item->setData(QString("%1/%2/%3").arg(btype, bid).arg(blastbackup));
+                item2 = new QStandardItem(bid);
+                item3 = new QStandardItem(btype);
+                item4 = new QStandardItem(lastbackupstr);
                 item5 = new QStandardItem(QString::number(group["backup-count"].toInt()));
 
                 row = model->rowCount();
