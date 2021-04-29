@@ -54,7 +54,7 @@ void logMessageOutput(QtMsgType type, const QMessageLogContext &, const QString 
         break;
     case QtInfoMsg:
         out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Info: " << str << "\n";
-
+        //sout << str;
         break;
     case QtWarningMsg:
         out << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Warning: " << str << "\n";

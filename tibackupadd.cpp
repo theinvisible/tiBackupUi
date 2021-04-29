@@ -222,6 +222,7 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
     {
         QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
         QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvBackupFolders->model());
+        QStandardItemModel *model2 = dynamic_cast<QStandardItemModel *>(ui->tvPBServer->model());
 
         if(ui->leBackupJobName->text().isEmpty())
         {
@@ -238,19 +239,31 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
         job.save_log = ui->cbSaveLog->isChecked();
         job.compare_via_checksum = ui->cbCompareViaChecksum->isChecked();
         job.notify = false;
-        if(ui->gbNotify->isChecked() == true)
+        if(ui->gbNotify->isChecked())
         {
             job.notify = true;
             job.notifyRecipients = ui->leNotifyRecipients->text();
         }
+        job.pbs = false;
+        if(ui->gbPBS->isChecked())
+        {
+            job.pbs = true;
+            job.pbs_server_uuid = ui->comboPBServer->itemData(ui->comboPBServer->currentIndex()).toString();
+            job.pbs_server_storage = ui->comboPBSDatastore->itemData(ui->comboPBSDatastore->currentIndex()).toString();
+            job.pbs_dest_folder = ui->lePBSDestFolder->text();
+            QList<int> p;
+            for(int j=0; j < model2->rowCount(); j++)
+            {
+                if(model2->item(j, 0)->checkState() == Qt::Checked)
+                {
+                    p.append(model2->item(j, 1)->text().toInt());
+                }
+            }
+            job.pbs_backup_ids = p;
+        }
         job.scriptBeforeBackup = ui->leScriptPathBeforeBackup->text();
         job.scriptAfterBackup = ui->leScriptPathAfterBackup->text();
 
-        /*
-        DeviceDisk selDisk;
-        selDisk.devname = devname;
-        DeviceDiskPartition part = selDisk.getPartitionByUUID(job.partition_uuid);
-        */
         ipcClient *client = ipcClient::instance();
         DeviceDiskPartition part = client->getPartitionByDevnameUUID(devname, job.partition_uuid);
 
@@ -903,4 +916,35 @@ void tiBackupAdd::on_comboPBSDatastore_currentIndexChanged(int index)
 
     ui->tvPBServer->setSortingEnabled(true);
     ui->tvPBServer->sortByColumn(1, Qt::AscendingOrder);
+}
+
+void tiBackupAdd::on_btnSelectPBSDest_clicked()
+{
+    QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
+    QString uuid = ui->comboBackupPartition->itemData(ui->comboBackupPartition->currentIndex()).toString();
+    QString defaultPath = "/";
+
+    qDebug() << "tiBackupAdd::on_btnSelectPBSDest_clicked() -> selected part uuid:" << uuid;
+    //DeviceDisk selDisk;
+    //selDisk.devname = devname;
+
+    //DeviceDiskPartition part = selDisk.getPartitionByUUID(uuid);
+    ipcClient *client = ipcClient::instance();
+    DeviceDiskPartition part = client->getPartitionByDevnameUUID(devname, uuid);
+    ui->lblDriveType->setText(part.type);
+
+    TiBackupLib lib;
+    if(lib.isMounted(&part))
+        defaultPath = lib.getMountDir(&part);
+
+    QString startDir = (ui->lePBSDestFolder->text().isEmpty()) ? defaultPath : ui->lePBSDestFolder->text();
+
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the destination directory"),
+                                                    startDir,
+                                                    QFileDialog::ShowDirsOnly
+                                                    | QFileDialog::DontResolveSymlinks);
+
+    ui->lePBSDestFolder->setText(dir);
+
+    qDebug() << "tiBackupAdd::on_btnSelectPBSDest_clicked() -> generic name::" << TiBackupLib::convertPath2Generic(dir, lib.getMountDir(&part));
 }
