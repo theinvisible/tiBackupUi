@@ -862,8 +862,8 @@ void tiBackupAdd::on_comboPBSDatastore_currentIndexChanged(int index)
                 QString file = "", infoword = "", infoval = "";
                 QString btype = group["backup-type"].toString();
                 QString bid = group["backup-id"].toString();
-                int blastbackup = group["last-backup"].toInt();
-                QString lastbackupstr = QDateTime::fromSecsSinceEpoch(blastbackup).toString("dd.MM.yyyy hh:mm");
+                qint64 blastbackup = group["last-backup"].toInt();
+                QString lastbackupstr = QDateTime::fromMSecsSinceEpoch(blastbackup * 1000).toString("dd.MM.yyyy hh:mm");
 
                 if(btype == "vm") {
                     file = "qemu-server.conf.blob";
