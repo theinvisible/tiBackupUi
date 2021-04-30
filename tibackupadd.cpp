@@ -680,9 +680,16 @@ void tiBackupAdd::updateJobDetails()
     ui->cbSaveLog->setChecked(currentJob->save_log);
     ui->cbCompareViaChecksum->setChecked(currentJob->compare_via_checksum);
     ui->leNotifyRecipients->setText(currentJob->notifyRecipients);
-    if(currentJob->notify == true)
+    if(currentJob->notify)
     {
         ui->gbNotify->setChecked(true);
+    }
+    if(currentJob->pbs)
+    {
+        ui->gbPBS->setChecked(true);
+        int devrow = ui->comboPBServer->findData(currentJob->pbs_server_uuid);
+        qInfo() << "foundpbsserver" << devrow << "rows" << ui->comboPBServer;
+        ui->comboPBServer->setCurrentIndex(devrow);
     }
     ui->leScriptPathBeforeBackup->setText(currentJob->scriptBeforeBackup);
     ui->leScriptPathAfterBackup->setText(currentJob->scriptAfterBackup);
