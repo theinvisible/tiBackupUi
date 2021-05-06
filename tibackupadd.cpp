@@ -33,6 +33,7 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QLocalSocket>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QTimer>
 
 #include "config.h"
 #include "tibackupapi.h"
@@ -244,13 +245,19 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
             job.notify = true;
             job.notifyRecipients = ui->leNotifyRecipients->text();
         }
+
+        ipcClient *client = ipcClient::instance();
+        DeviceDiskPartition part = client->getPartitionByDevnameUUID(devname, job.partition_uuid);
+
+        TiBackupLib lib;
+
         job.pbs = false;
         if(ui->gbPBS->isChecked())
         {
             job.pbs = true;
             job.pbs_server_uuid = ui->comboPBServer->itemData(ui->comboPBServer->currentIndex()).toString();
             job.pbs_server_storage = ui->comboPBSDatastore->itemData(ui->comboPBSDatastore->currentIndex()).toString();
-            job.pbs_dest_folder = ui->lePBSDestFolder->text();
+            job.pbs_dest_folder = TiBackupLib::convertPath2Generic(ui->lePBSDestFolder->text(), lib.getMountDir(&part));
             QList<int> p;
             for(int j=0; j < model2->rowCount(); j++)
             {
@@ -263,11 +270,6 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
         }
         job.scriptBeforeBackup = ui->leScriptPathBeforeBackup->text();
         job.scriptAfterBackup = ui->leScriptPathAfterBackup->text();
-
-        ipcClient *client = ipcClient::instance();
-        DeviceDiskPartition part = client->getPartitionByDevnameUUID(devname, job.partition_uuid);
-
-        TiBackupLib lib;
 
         QHash<QString, QString> h;
         for(int i=0; i < model->rowCount(); i++)
@@ -325,6 +327,7 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
 
         //QString devname = ui->comboBackupDevice->itemData(ui->comboBackupDevice->currentIndex()).toString();
         QStandardItemModel *model = dynamic_cast<QStandardItemModel *>(ui->tvBackupFolders->model());
+        QStandardItemModel *model2 = dynamic_cast<QStandardItemModel *>(ui->tvPBServer->model());
         tiConfBackupJobs jobs;
 
         if(ui->leBackupJobName->text().isEmpty())
@@ -358,22 +361,30 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
             job.notify = true;
             job.notifyRecipients = ui->leNotifyRecipients->text();
         }
+        job.pbs = false;
+        if(ui->gbPBS->isChecked())
+        {
+            job.pbs = true;
+            job.pbs_server_uuid = ui->comboPBServer->itemData(ui->comboPBServer->currentIndex()).toString();
+            job.pbs_server_storage = ui->comboPBSDatastore->itemData(ui->comboPBSDatastore->currentIndex()).toString();
+            job.pbs_dest_folder = ui->lePBSDestFolder->text();
+            QList<int> p;
+            for(int j=0; j < model2->rowCount(); j++)
+            {
+                if(model2->item(j, 0)->checkState() == Qt::Checked)
+                {
+                    p.append(model2->item(j, 1)->text().toInt());
+                }
+            }
+            job.pbs_backup_ids = p;
+        }
         job.scriptBeforeBackup = ui->leScriptPathBeforeBackup->text();
         job.scriptAfterBackup = ui->leScriptPathAfterBackup->text();
-
-        /*
-        DeviceDisk selDisk;
-        selDisk.devname = devname;
-
-        DeviceDiskPartition part = selDisk.getPartitionByUUID(job.partition_uuid);
-        TiBackupLib lib;
-        */
 
         QHash<QString, QString> h;
         QString dest;
         TiBackupLib lib;
         bool diskMounted = false;
-        //DeviceDiskPartition part = TiBackupLib::getPartitionByUUID(getBackupPartitionValue());
         ipcClient *client = ipcClient::instance();
         DeviceDiskPartition part = client->getPartitionByUUID(getBackupPartitionValue());
         if(lib.isMounted(&part))
@@ -687,9 +698,9 @@ void tiBackupAdd::updateJobDetails()
     if(currentJob->pbs)
     {
         ui->gbPBS->setChecked(true);
-        int devrow = ui->comboPBServer->findData(currentJob->pbs_server_uuid);
-        qInfo() << "foundpbsserver" << devrow << "rows" << ui->comboPBServer;
-        ui->comboPBServer->setCurrentIndex(devrow);
+        ui->lePBSDestFolder->setText(currentJob->pbs_dest_folder);
+        // Use timer to load async
+        QTimer::singleShot(1, this, &tiBackupAdd::loadPBSData);
     }
     ui->leScriptPathBeforeBackup->setText(currentJob->scriptBeforeBackup);
     ui->leScriptPathAfterBackup->setText(currentJob->scriptAfterBackup);
@@ -810,6 +821,15 @@ void tiBackupAdd::updatePBServers()
     }
 }
 
+void tiBackupAdd::loadPBSData()
+{
+    int devrow = ui->comboPBServer->findData(currentJob->pbs_server_uuid);
+    ui->comboPBServer->setCurrentIndex(devrow);
+    on_btnPBSConnect_clicked();
+    int dsrow = ui->comboPBSDatastore->findData(currentJob->pbs_server_storage);
+    ui->comboPBSDatastore->setCurrentIndex(dsrow);
+}
+
 void tiBackupAdd::on_btnPBSConnect_clicked()
 {
     QString selPBServer = ui->comboPBServer->itemData(ui->comboPBServer->currentIndex()).toString();
@@ -905,6 +925,12 @@ void tiBackupAdd::on_comboPBSDatastore_currentIndexChanged(int index)
 
                 item = new QStandardItem(infoval);
                 item->setCheckable(true);
+                // Check if in Edit mode and check loaded ids for current backupjob
+                if(formmode == tiBackupAddModeEdit && selPBSDatastore == currentJob->pbs_server_storage)
+                {
+                    if(currentJob->pbs_backup_ids.contains(bid.toInt()))
+                        item->setCheckState(Qt::CheckState::Checked);
+                }
                 item->setData(QString("%1/%2/%3").arg(btype, bid).arg(blastbackup));
                 item2 = new QStandardItem(bid);
                 item3 = new QStandardItem(btype);

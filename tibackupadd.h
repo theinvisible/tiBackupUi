@@ -68,6 +68,7 @@ private slots:
 
     void on_btnPBSManage_clicked();
     void updatePBServers();
+    void loadPBSData();
 
     void on_btnPBSConnect_clicked();
 
