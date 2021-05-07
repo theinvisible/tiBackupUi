@@ -258,12 +258,12 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
             job.pbs_server_uuid = ui->comboPBServer->itemData(ui->comboPBServer->currentIndex()).toString();
             job.pbs_server_storage = ui->comboPBSDatastore->itemData(ui->comboPBSDatastore->currentIndex()).toString();
             job.pbs_dest_folder = TiBackupLib::convertPath2Generic(ui->lePBSDestFolder->text(), lib.getMountDir(&part));
-            QList<int> p;
+            QList<QString> p;
             for(int j=0; j < model2->rowCount(); j++)
             {
                 if(model2->item(j, 0)->checkState() == Qt::Checked)
                 {
-                    p.append(model2->item(j, 1)->text().toInt());
+                    p.append(QString("%1/%2").arg(model2->item(j, 2)->text(), model2->item(j, 1)->text()));
                 }
             }
             job.pbs_backup_ids = p;
@@ -368,12 +368,12 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
             job.pbs_server_uuid = ui->comboPBServer->itemData(ui->comboPBServer->currentIndex()).toString();
             job.pbs_server_storage = ui->comboPBSDatastore->itemData(ui->comboPBSDatastore->currentIndex()).toString();
             job.pbs_dest_folder = ui->lePBSDestFolder->text();
-            QList<int> p;
+            QList<QString> p;
             for(int j=0; j < model2->rowCount(); j++)
             {
                 if(model2->item(j, 0)->checkState() == Qt::Checked)
                 {
-                    p.append(model2->item(j, 1)->text().toInt());
+                    p.append(QString("%1/%2").arg(model2->item(j, 2)->text(), model2->item(j, 1)->text()));
                 }
             }
             job.pbs_backup_ids = p;
@@ -928,7 +928,7 @@ void tiBackupAdd::on_comboPBSDatastore_currentIndexChanged(int index)
                 // Check if in Edit mode and check loaded ids for current backupjob
                 if(formmode == tiBackupAddModeEdit && selPBSDatastore == currentJob->pbs_server_storage)
                 {
-                    if(currentJob->pbs_backup_ids.contains(bid.toInt()))
+                    if(currentJob->pbs_backup_ids.contains(QString("%1/%2").arg(btype, bid)))
                         item->setCheckState(Qt::CheckState::Checked);
                 }
                 item->setData(QString("%1/%2/%3").arg(btype, bid).arg(blastbackup));
