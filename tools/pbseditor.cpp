@@ -32,6 +32,7 @@ void PBSEditor::prepareDialog(PBSEditor::ActionType action, const QString &pbs_u
         ui->sbPort->setValue(p->port);
         ui->leUsername->setText(p->username);
         ui->lePassword->setText(p->password);
+        ui->leFingerprint->setText(p->fingerprint);
     }
 }
 
@@ -62,6 +63,7 @@ void PBSEditor::on_buttonBox_accepted()
     p.port = ui->sbPort->value();
     p.username = ui->leUsername->text();
     p.password = ui->lePassword->text();
+    p.fingerprint = ui->leFingerprint->text();
     ticonfpb->saveItem(p);
 
     emit form_finished();

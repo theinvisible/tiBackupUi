@@ -885,7 +885,6 @@ void tiBackupAdd::on_comboPBSDatastore_currentIndexChanged(int index)
             {
                 QJsonObject group = groups[i].toObject();
 
-
                 QString file = "", infoword = "", infoval = "";
                 QString btype = group["backup-type"].toString();
                 QString bid = group["backup-id"].toString();
