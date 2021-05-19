@@ -4,6 +4,7 @@
 #include <QMessageBox>
 
 #include "ticonf.h"
+#include "pbsclient.h"
 
 PBSEditor::PBSEditor(QWidget *parent) :
     QDialog(parent),
@@ -78,4 +79,18 @@ void PBSEditor::on_buttonBox_rejected()
 void PBSEditor::accept()
 {
 
+}
+
+void PBSEditor::on_btnTest_clicked()
+{
+    pbsClient *pbs = pbsClient::instanceUnique();
+    HttpStatus::Code status = pbs->auth(ui->leHost->text(), ui->sbPort->value(), ui->leUsername->text(), ui->lePassword->text());
+    if(status == HttpStatus::Code::OK)
+    {
+        QMessageBox::information(this, tr("PBS Connection Test"), tr("Connection Test OK!"));
+    }
+    else
+    {
+        QMessageBox::warning(this, tr("PBS Connection Test"), tr("Connection Test failed!"));
+    }
 }

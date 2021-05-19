@@ -513,7 +513,8 @@ void tiBackupAdd::on_btnPartitionMount_clicked()
     DeviceDisk selDisk;
     selDisk.devname = devname;
 
-    DeviceDiskPartition part = selDisk.getPartitionByUUID(uuid);
+    ipcClient *client = ipcClient::instance();
+    DeviceDiskPartition part = client->getPartitionByUUID(uuid);
 
     TiBackupLib lib;
     if(lib.isMounted(&part))
@@ -526,7 +527,7 @@ void tiBackupAdd::on_btnPartitionMount_clicked()
         job.encLUKSType = static_cast<tiBackupEncLUKS>(ui->cbLUKSOptions->currentIndex());
         job.encLUKSFilePath = ui->leLUKSFilePath->text();
 
-        lib.mountPartition(&part, &job);
+        client->mountPartition(part, job);
         updatePartitionInformation();
     }
 }

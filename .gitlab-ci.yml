@@ -3,7 +3,7 @@ stages:
   - build
 
 variables:
-  TIBACKUPLIB_DEV_RELEASE: "0.6.2-2"
+  TIBACKUPLIB_DEV_RELEASE: "0.7.0-1"
 
 .build_template: &build_template_def
   before_script:
