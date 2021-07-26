@@ -65,7 +65,11 @@
             <item row="3" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
-               <widget class="QComboBox" name="comboBackupPartition"/>
+               <widget class="QComboBox" name="comboBackupPartition">
+                <property name="editable">
+                 <bool>true</bool>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QPushButton" name="btnPartitionMount">
@@ -113,7 +117,11 @@
             <item row="1" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_4">
               <item>
-               <widget class="QComboBox" name="comboBackupDevice"/>
+               <widget class="QComboBox" name="comboBackupDevice">
+                <property name="editable">
+                 <bool>true</bool>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QPushButton" name="btnRefreshDevices">
