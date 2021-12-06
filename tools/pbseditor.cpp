@@ -2,6 +2,7 @@
 #include "ui_pbseditor.h"
 
 #include <QMessageBox>
+#include <QFileDialog>
 
 #include "ticonf.h"
 #include "pbsclient.h"
@@ -34,6 +35,8 @@ void PBSEditor::prepareDialog(PBSEditor::ActionType action, const QString &pbs_u
         ui->leUsername->setText(p->username);
         ui->lePassword->setText(p->password);
         ui->leFingerprint->setText(p->fingerprint);
+        ui->leKeyFile->setText(p->keyfile);
+        ui->leKeyPass->setText(p->keypass);
     }
 }
 
@@ -65,6 +68,8 @@ void PBSEditor::on_buttonBox_accepted()
     p.username = ui->leUsername->text();
     p.password = ui->lePassword->text();
     p.fingerprint = ui->leFingerprint->text();
+    p.keyfile = ui->leKeyFile->text();
+    p.keypass = ui->leKeyPass->text();
     ticonfpb->saveItem(p);
 
     emit form_finished();
@@ -93,4 +98,14 @@ void PBSEditor::on_btnTest_clicked()
     {
         QMessageBox::warning(this, tr("PBS Connection Test"), tr("Connection Test failed!"));
     }
+}
+
+void PBSEditor::on_btnSelectKeyFile_clicked()
+{
+    QString startDir = (ui->leKeyFile->text().isEmpty()) ? "/" : ui->leKeyFile->text();
+
+    QString file = QFileDialog::getOpenFileName(this, tr("Choose the key encryption file"), startDir);
+
+    if(!file.isEmpty())
+        ui->leKeyFile->setText(file);
 }

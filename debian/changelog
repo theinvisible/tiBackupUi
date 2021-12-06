@@ -1,3 +1,9 @@
+tibackupui (0.7.3-1) precise; urgency=low
+
+  * For changelog see git commits
+
+ -- Rene Hadler <rene@iksdeh.at>  Mon, 6 Dec 2021 16:25:00 +0100
+
 tibackupui (0.7.1-2) precise; urgency=low
 
   * For changelog see git commits

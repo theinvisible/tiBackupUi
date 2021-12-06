@@ -31,6 +31,7 @@ private slots:
     void on_buttonBox_rejected();
 
     void on_btnTest_clicked();
+    void on_btnSelectKeyFile_clicked();
 
 public slots:
     void accept();

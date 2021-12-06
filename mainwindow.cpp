@@ -98,6 +98,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(service, SIGNAL(serviceStopped()), this, SLOT(updateServiceStatus()));
     connect(service, SIGNAL(serviceInstalled()), this, SLOT(updateServiceStatus()));
 
+    // Check tiBackup IPC health
+    ipcClient *client = ipcClient::instance();
+    ipcClient::STATUS_ANSWER ret = client->checkHealth();
+    if(ret.status != ipcClient::STATUS_OK)
+    {
+        QMessageBox::warning(this, tr("tiBackup Service Health Check"), tr("tiBackup Service is not running or answering! Please check status!"));
+    }
+
     refreshBackupJobList();
     updateServiceStatus();
 }
