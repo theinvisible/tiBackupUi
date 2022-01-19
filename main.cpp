@@ -45,7 +45,7 @@ void logMessageOutput(QtMsgType type, const QMessageLogContext &, const QString 
     QTextStream out(tibackupLog);
     QDateTime currentDate = QDateTime::currentDateTime();
 
-    sout << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " openfortiGUI::Info: " << str << "\n";
+    sout << currentDate.toString("MMM d hh:mm:ss").toStdString().c_str() << " tiBackupUi::Info: " << str << "\n";
 
     switch (type) {
     case QtDebugMsg:
