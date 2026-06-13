@@ -24,11 +24,11 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#include <QDesktopWidget>
 #include <QDebug>
 #include <QStandardItemModel>
 #include <QMessageBox>
 #include <QFileSystemWatcher>
+#include <QFile>
 #include <QScrollBar>
 #include <QThread>
 #include <QTimer>
@@ -101,7 +101,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Check tiBackup IPC health
     ipcClient *client = ipcClient::instance();
     ipcClient::STATUS_ANSWER ret = client->checkHealth();
-    if(ret.status != ipcClient::STATUS_OK)
+    if(ret.status != ipcClient::STATUS::STATUS_OK)
     {
         QMessageBox::warning(this, tr("tiBackup Service Health Check"), tr("tiBackup Service is not running or answering! Please check status!"));
     }
@@ -211,8 +211,7 @@ void MainWindow::on_btnBackupJobDelete_clicked()
         return;
     }
 
-    tiConfBackupJobs jobss;
-    if(jobss.removeJobByName(jobName))
+    if(ipcClient::instance()->deleteJob(jobName).status == ipcClient::STATUS::STATUS_OK)
     {
         refreshBackupJobList();
     }
@@ -375,34 +374,26 @@ void MainWindow::updateServiceStatus()
     {
         ui->lblServiceStatus->setText(tr("Started"));
         ui->btnServiceStart->setDisabled(true);
-        ui->btnServiceStop->setEnabled(true);
-        ui->btnServiceInstall->setDisabled(true);
-        break;
+        ui->btnServiceStop->setEnabled(true);        break;
     }
     case tiBackupServiceStatusStopped:
     {
         ui->lblServiceStatus->setText(tr("Stopped"));
         ui->btnServiceStart->setEnabled(true);
-        ui->btnServiceStop->setDisabled(true);
-        ui->btnServiceInstall->setDisabled(true);
-        break;
+        ui->btnServiceStop->setDisabled(true);        break;
     }
     case tiBackupServiceStatusNotFound:
     {
         ui->lblServiceStatus->setText(tr("init.d script not found"));
         ui->btnServiceStart->setDisabled(true);
-        ui->btnServiceStop->setDisabled(true);
-        ui->btnServiceInstall->setEnabled(true);
-        break;
+        ui->btnServiceStop->setDisabled(true);        break;
     }
     case tiBackupServiceStatusFailed:
     case tiBackupServiceStatusUnknown:
     {
         ui->lblServiceStatus->setText(tr("Service failed"));
         ui->btnServiceStart->setDisabled(true);
-        ui->btnServiceStop->setDisabled(true);
-        ui->btnServiceInstall->setDisabled(true);
-        break;
+        ui->btnServiceStop->setDisabled(true);        break;
     }
     }
 
@@ -427,35 +418,3 @@ void MainWindow::on_btnServiceStop_clicked()
     service->stop();
 }
 
-void MainWindow::on_btnServiceInstall_clicked()
-{
-    QString initd = main_settings->getValue("paths/initd").toString();
-    QString installPath = (!initd.isEmpty()) ? initd : tibackup_config::initd_default;
-
-    int ret = QMessageBox::warning(this, tr("Install tiBackup service"),
-                                tr("This will install the tiBackup service in <%1>, continue?").arg(installPath),
-                                QMessageBox::Yes | QMessageBox::No);
-
-    switch(ret)
-    {
-    case QMessageBox::Yes:
-    {
-        if(service->install(installPath))
-        {
-            main_settings->setValue("paths/initd", installPath);
-            QMessageBox::information(this, tr("Install tiBackup service"), tr("Service was installed successfully."));
-        }
-        else
-        {
-            QMessageBox::information(this, tr("Install tiBackup service"), tr("Service was not installed, error."));
-        }
-
-        break;
-    }
-    case QMessageBox::No:
-    default:
-        return;
-    }
-
-    updateServiceStatus();
-}

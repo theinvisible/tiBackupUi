@@ -1,0 +1,51 @@
+name: build-check
+
+# Variant B: build tiBackupUi against a tiBackupLib that is built from a pinned
+# source ref. Fast PR/build feedback without depending on a published package.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  # Pin the tiBackupLib version. Use a release tag (e.g. v0.8.0) for stable
+  # checks; during the Qt6 migration the matching branch is "qt6".
+  TIBACKUPLIB_REF: qt6
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout tiBackupUi
+        uses: actions/checkout@v4
+
+      - name: Checkout tiBackupLib (${{ env.TIBACKUPLIB_REF }})
+        uses: actions/checkout@v4
+        with:
+          repository: theinvisible/tiBackupLib
+          ref: ${{ env.TIBACKUPLIB_REF }}
+          path: _deps/tiBackupLib
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake \
+            qt6-base-dev qt6-base-dev-tools \
+            libpoco-dev libudev-dev libblkid-dev uuid-dev
+
+      - name: Build & install tiBackupLib
+        run: |
+          cmake -S _deps/tiBackupLib -B _deps/tiBackupLib/build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/_install"
+          cmake --build _deps/tiBackupLib/build -j"$(nproc)"
+          cmake --install _deps/tiBackupLib/build
+
+      - name: Build tiBackupUi
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="${{ github.workspace }}/_install"
+          cmake --build build -j"$(nproc)"

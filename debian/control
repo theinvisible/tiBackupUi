@@ -2,11 +2,11 @@ Source: tibackupui
 Section: admin
 Priority: optional
 Maintainer: Rene Hadler <rene@iksdeh.at>
-Build-Depends: debhelper (>= 8.0.0)
+Build-Depends: debhelper (>= 8.0.0), cmake, qt6-base-dev
 
 Package: tibackupui
 Architecture: amd64
-Depends: ${shlibs:Depends}, tibackup, xauth, tibackuplib (>= 0.7.3-1)
+Depends: ${shlibs:Depends}, tibackup, xauth, tibackuplib (>= 0.8.0)
 Conflicts:
 Replaces:
 Provides: tibackupui

@@ -5,6 +5,7 @@
 #include <QMessageBox>
 
 #include "ticonf.h"
+#include "ipcclient.h"
 #include "pbseditor.h"
 
 PBSManager::PBSManager(QWidget *parent) :
@@ -130,8 +131,7 @@ void PBSManager::on_btnRemove_clicked()
     QMessageBox::StandardButton sel = QMessageBox::question(this, tr("Remove PBS item"), tr("You really want to remove PBS Server %1").arg(pbUuid));
     if(sel == QMessageBox::Yes)
     {
-        tiConfPBServers *ticonfpbs = tiConfPBServers::instance();
-        ticonfpbs->removeItemByUuid(pbUuid);
+        ipcClient::instance()->deletePBServer(pbUuid);
         loadData();
     }
 }

@@ -67,7 +67,6 @@ private slots:
 
     void on_btnServiceStart_clicked();
     void on_btnServiceStop_clicked();
-    void on_btnServiceInstall_clicked();
 
 private:
     Ui::MainWindow *ui;

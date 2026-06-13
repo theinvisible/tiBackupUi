@@ -1,23 +1,58 @@
 # Defines stages which are to be executed
-stages:  
+stages:
+  - check
   - build
 
 variables:
-  TIBACKUPLIB_DEV_RELEASE: "0.7.3-1"
+  TIBACKUPLIB_DEV_RELEASE: "0.8.0-1"
+  # Variant B build-check: tiBackupLib is built from this pinned source ref.
+  # Use a release tag (e.g. v0.8.0) for stable checks; during the Qt6 migration
+  # the matching branch is "qt6".
+  TIBACKUPLIB_REF: "qt6"
+  TIBACKUPLIB_URL: "https://github.com/theinvisible/tiBackupLib.git"
 
+# ---------------------------------------------------------------------------
+# Variant B (PR/build-check): build against tiBackupLib built from a pinned
+# source ref via find_package. No published package required. Runs everywhere.
+# The build images already provide Qt6/cmake/Poco/udev/blkid (lib toolchain).
+# ---------------------------------------------------------------------------
+.build_check_template: &build_check_def
+  stage: check
+  script:
+    - git clone --depth 1 --branch "$TIBACKUPLIB_REF" "$TIBACKUPLIB_URL" /tmp/tiBackupLib
+    - cmake -S /tmp/tiBackupLib -B /tmp/tiBackupLib/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/tmp/tibackuplib-install
+    - cmake --build /tmp/tiBackupLib/build -j4
+    - cmake --install /tmp/tiBackupLib/build
+    - cmake -S . -B build-check -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/tmp/tibackuplib-install
+    - cmake --build build-check -j4
+  tags:
+    - build-docker01
+
+build-check-ubuntu-2404-64:
+  image: git.styrion.net:4567/iteas/docker-build-images/iteas-build-ubuntu-2404-64
+  <<: *build_check_def
+
+build-check-debian-13-64:
+  image: git.styrion.net:4567/iteas/docker-build-images/iteas-build-debian-13-64
+  <<: *build_check_def
+
+# ---------------------------------------------------------------------------
+# Variant A (releases): build the .deb against the published tibackuplib pkg.
+# ---------------------------------------------------------------------------
 .build_template: &build_template_def
   before_script:
     - export CI_T_DATE=`LANG=C date -R`
     - touch ./debian/changelog
-    - echo ""                                                                             > ./debian/changelog
-    - echo "tibackupui (99.9.${CI_PIPELINE_ID}-1) precise; urgency=low"                  >> ./debian/changelog
-    - echo ""                                                                            >> ./debian/changelog
-    - echo "  * Dev build from master"                                                   >> ./debian/changelog
-    - echo ""                                                                            >> ./debian/changelog
-    - echo " -- Rene Hadler <rene@hadler.me>  ${CI_T_DATE}"                              >> ./debian/changelog
+    - echo ""                                                              > ./debian/changelog
+    - echo "tibackupui (99.9.${CI_PIPELINE_ID}-1) precise; urgency=low"   >> ./debian/changelog
+    - echo ""                                                             >> ./debian/changelog
+    - echo "  * Dev build from master"                                    >> ./debian/changelog
+    - echo ""                                                             >> ./debian/changelog
+    - echo " -- Rene Hadler <rene@hadler.me>  ${CI_T_DATE}"               >> ./debian/changelog
 
-# Stage "ubuntu"
-build-ubuntu-2004-64-dev:  
+# Stage "ubuntu" (dev)
+build-ubuntu-2404-64-dev:
+  image: git.styrion.net:4567/iteas/docker-build-images/iteas-build-ubuntu-2404-64
   <<: *build_template_def
   stage: build
   script:
@@ -26,22 +61,22 @@ build-ubuntu-2004-64-dev:
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
     - mv ../tibackupui_*.deb build/
-    - upload_build_dev build/tibackup*.deb || true
+    - upload_build_dev build/tibackupui*.deb || true
     - sudo apt purge tibackuplib-dev -y && sudo apt autoremove -y
 
-  # The files which are to be made available in GitLab
   artifacts:
     paths:
       - build/*
 
   tags:
-    - build-ubuntu-2004-64
+    - build-docker01
 
   only:
     - master
-  
-# Stage "ubuntu"
-build-ubuntu-1804-64-dev:  
+
+# Stage "debian" (dev)
+build-debian-13-64-dev:
+  image: git.styrion.net:4567/iteas/docker-build-images/iteas-build-debian-13-64
   <<: *build_template_def
   stage: build
   script:
@@ -50,94 +85,22 @@ build-ubuntu-1804-64-dev:
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
     - mv ../tibackupui_*.deb build/
-    - upload_build_dev build/tibackup*.deb || true
+    - upload_build_dev build/tibackupui*.deb || true
     - sudo apt purge tibackuplib-dev -y && sudo apt autoremove -y
 
-  # The files which are to be made available in GitLab
   artifacts:
     paths:
       - build/*
 
   tags:
-    - build-ubuntu-1804-64
+    - build-docker01
 
   only:
     - master
 
-# Stage "debian"
-build-debian-10-64-dev:  
-  <<: *build_template_def
-  stage: build
-  script:
-    - mkdir build
-    - sudo apt update && sudo apt install tibackuplib tibackuplib-dev -y
-    - echo "y" | debuild -- clean
-    - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
-    - mv ../tibackupui_*.deb build/
-    - upload_build_dev build/tibackup*.deb || true
-    - sudo apt purge tibackuplib-dev -y && sudo apt autoremove -y
-
-  # The files which are to be made available in GitLab
-  artifacts:
-    paths:
-      - build/*
-
-  tags:
-    - build-debian-10-64
-
-  only:
-    - master
-
-# Stage "debian"
-build-debian-11-64-dev:  
-  <<: *build_template_def
-  stage: build
-  script:
-    - mkdir build
-    - sudo apt update && sudo apt install tibackuplib tibackuplib-dev -y
-    - echo "y" | debuild -- clean
-    - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
-    - mv ../tibackupui_*.deb build/
-    - upload_build_dev build/tibackup*.deb || true
-    - sudo apt purge tibackuplib-dev -y && sudo apt autoremove -y
-
-  # The files which are to be made available in GitLab
-  artifacts:
-    paths:
-      - build/*
-
-  tags:
-    - build-debian-11-64
-
-  only:
-    - master
-
-# Stage "debian"
-build-debian-9-64-dev:  
-  <<: *build_template_def
-  stage: build
-  script:
-    - mkdir build
-    - sudo apt update && sudo apt install tibackuplib tibackuplib-dev -y
-    - echo "y" | debuild -- clean
-    - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
-    - mv ../tibackupui_*.deb build/
-    - upload_build_dev build/tibackup*.deb || true
-    - sudo apt purge tibackuplib-dev -y && sudo apt autoremove -y
-
-  # The files which are to be made available in GitLab
-  artifacts:
-    paths:
-      - build/*
-
-  tags:
-    - build-debian-9-64
-
-  only:
-    - master
-
-# Stage "ubuntu"
-build-ubuntu-2004-64:  
+# Stage "ubuntu" (release)
+build-ubuntu-2404-64:
+  image: git.styrion.net:4567/iteas/docker-build-images/iteas-build-ubuntu-2404-64
   stage: build
   script:
     - mkdir build
@@ -145,22 +108,22 @@ build-ubuntu-2004-64:
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
     - mv ../tibackupui_*.deb build/
-    - upload_build_release build/tibackup*.deb || true
+    - upload_build_release build/tibackupui*.deb || true
     - sudo apt purge tibackuplib tibackuplib-dev -y && sudo apt autoremove -y
 
-  # The files which are to be made available in GitLab
   artifacts:
     paths:
       - build/*
 
   tags:
-    - build-ubuntu-2004-64
+    - build-docker01
 
   only:
     - tags
 
-# Stage "ubuntu"
-build-ubuntu-1804-64:  
+# Stage "debian" (release)
+build-debian-13-64:
+  image: git.styrion.net:4567/iteas/docker-build-images/iteas-build-debian-13-64
   stage: build
   script:
     - mkdir build
@@ -168,85 +131,15 @@ build-ubuntu-1804-64:
     - echo "y" | debuild -- clean
     - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
     - mv ../tibackupui_*.deb build/
-    - upload_build_release build/tibackup*.deb || true
+    - upload_build_release build/tibackupui*.deb || true
     - sudo apt purge tibackuplib tibackuplib-dev -y && sudo apt autoremove -y
 
-  # The files which are to be made available in GitLab
   artifacts:
     paths:
       - build/*
 
   tags:
-    - build-ubuntu-1804-64
-
-  only:
-    - tags
-
-# Stage "debian"
-build-debian-9-64:  
-  stage: build
-  script:
-    - mkdir build
-    - sudo apt update && sudo apt install tibackuplib=$TIBACKUPLIB_DEV_RELEASE tibackuplib-dev=$TIBACKUPLIB_DEV_RELEASE -y --allow-downgrades
-    - echo "y" | debuild -- clean
-    - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
-    - mv ../tibackupui_*.deb build/
-    - upload_build_release build/tibackup*.deb || true
-    - sudo apt purge tibackuplib tibackuplib-dev -y && sudo apt autoremove -y
-
-  # The files which are to be made available in GitLab
-  artifacts:
-    paths:
-      - build/*
-
-  tags:
-    - build-debian-9-64
-
-  only:
-    - tags
-
-# Stage "debian"
-build-debian-10-64:  
-  stage: build
-  script:
-    - mkdir build
-    - sudo apt update && sudo apt install tibackuplib=$TIBACKUPLIB_DEV_RELEASE tibackuplib-dev=$TIBACKUPLIB_DEV_RELEASE -y --allow-downgrades
-    - echo "y" | debuild -- clean
-    - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
-    - mv ../tibackupui_*.deb build/
-    - upload_build_release build/tibackup*.deb || true
-    - sudo apt purge tibackuplib tibackuplib-dev -y && sudo apt autoremove -y
-
-  # The files which are to be made available in GitLab
-  artifacts:
-    paths:
-      - build/*
-
-  tags:
-    - build-debian-10-64
-
-  only:
-    - tags
-
-# Stage "debian"
-build-debian-11-64:  
-  stage: build
-  script:
-    - mkdir build
-    - sudo apt update && sudo apt install tibackuplib=$TIBACKUPLIB_DEV_RELEASE tibackuplib-dev=$TIBACKUPLIB_DEV_RELEASE -y --allow-downgrades
-    - echo "y" | debuild -- clean
-    - echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=4" -us -uc
-    - mv ../tibackupui_*.deb build/
-    - upload_build_release build/tibackup*.deb || true
-    - sudo apt purge tibackuplib tibackuplib-dev -y && sudo apt autoremove -y
-
-  # The files which are to be made available in GitLab
-  artifacts:
-    paths:
-      - build/*
-
-  tags:
-    - build-debian-11-64
+    - build-docker01
 
   only:
     - tags

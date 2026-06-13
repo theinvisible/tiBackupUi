@@ -28,6 +28,9 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QTextStream>
 #include <QFileDialog>
 #include <QClipboard>
+#include <QMessageBox>
+
+#include "ipcclient.h"
 
 scriptEditor::scriptEditor(QWidget *parent) :
     QWidget(parent),
@@ -57,11 +60,16 @@ void scriptEditor::loadScript(const QString &scriptPath)
 
 void scriptEditor::on_btnSave_clicked()
 {
-    QFile scriptFile(ui->leScriptPath->text());
-    scriptFile.open(QIODevice::WriteOnly | QIODevice::Text);
-    QTextStream out(&scriptFile);
-    out << ui->teScriptSource->toPlainText();
-    scriptFile.close();
+    // The GUI is unprivileged; the script lives under the (root-owned) scripts
+    // directory and is written by the daemon over IPC.
+    ipcClient::STATUS_ANSWER ret = ipcClient::instance()->saveScript(ui->leScriptPath->text(), ui->teScriptSource->toPlainText());
+    if(ret.status != ipcClient::STATUS::STATUS_OK)
+    {
+        QMessageBox::warning(this, tr("Save script"),
+                             tr("The script could not be saved. It must be located in the configured scripts directory and the tiBackup service must be running."));
+        return;
+    }
+
     parentWidget()->close();
 
     emit scriptSaved(ui->leScriptPath->text());

@@ -25,6 +25,9 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include "ui_tipreferences.h"
 
 #include <QFileDialog>
+#include <QMessageBox>
+
+#include "ipcclient.h"
 
 tiPreferences::tiPreferences(QWidget *parent) :
     QWidget(parent),
@@ -44,7 +47,7 @@ tiPreferences::tiPreferences(QWidget *parent) :
     ui->leSMTPServer->setText(main_settings->getValue("smtp/server").toString());
     ui->cbSMTPAuth->setChecked(main_settings->getValue("smtp/auth").toBool());
     ui->leSMTPUsername->setText(main_settings->getValue("smtp/username").toString());
-    ui->leSMTPPassword->setText(QByteArray().fromBase64(QByteArray().append(main_settings->getValue("smtp/password").toString())));
+    ui->leSMTPPassword->setText(QString(QByteArray::fromBase64(main_settings->getValue("smtp/password").toString().toLatin1())));
 
     if(ui->cbSMTPAuth->isChecked() == true)
     {
@@ -100,23 +103,27 @@ void tiPreferences::on_btnLogs_clicked()
 
 void tiPreferences::on_btnSave_clicked()
 {
-    main_settings->setValue("main/debug", ui->cbDebug->isChecked());
+    // The GUI runs unprivileged; main.conf lives under /etc and is written by the
+    // (root) daemon. Batch all settings and relay them over IPC.
+    QHash<QString, QString> values;
+    values["main/debug"] = ui->cbDebug->isChecked() ? "true" : "false";
 
-    main_settings->setValue("paths/backupjobs", ui->leBackupjobsPath->text());
-    main_settings->setValue("paths/logs", ui->leLogsPath->text());
-    main_settings->setValue("paths/scripts", ui->leBackupScriptsPath->text());
-    main_settings->setValue("paths/initd", ui->leInitdPath->text());
+    values["paths/backupjobs"] = ui->leBackupjobsPath->text();
+    values["paths/logs"] = ui->leLogsPath->text();
+    values["paths/scripts"] = ui->leBackupScriptsPath->text();
 
-    main_settings->setValue("smtp/server", ui->leSMTPServer->text());
-    main_settings->setValue("smtp/auth", ui->cbSMTPAuth->isChecked());
-    main_settings->setValue("smtp/username", ui->leSMTPUsername->text());
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    main_settings->setValue("smtp/password", QString(ui->leSMTPPassword->text().toLatin1().toBase64()));
-#else
-    main_settings->setValue("smtp/password", QString(ui->leSMTPPassword->text().toAscii().toBase64()));
-#endif
+    values["smtp/server"] = ui->leSMTPServer->text();
+    values["smtp/auth"] = ui->cbSMTPAuth->isChecked() ? "true" : "false";
+    values["smtp/username"] = ui->leSMTPUsername->text();
+    values["smtp/password"] = QString(ui->leSMTPPassword->text().toLatin1().toBase64());
 
-    main_settings->sync();
+    ipcClient::STATUS_ANSWER ret = ipcClient::instance()->setMainConf(values);
+    if(ret.status != ipcClient::STATUS::STATUS_OK)
+    {
+        QMessageBox::warning(this, tr("Preferences"),
+                             tr("Settings could not be saved. Is the tiBackup service running and are you a member of the 'tibackup' group?"));
+        return;
+    }
 
     parentWidget()->close();
 }

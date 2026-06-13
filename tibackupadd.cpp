@@ -271,10 +271,10 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
         job.scriptBeforeBackup = ui->leScriptPathBeforeBackup->text();
         job.scriptAfterBackup = ui->leScriptPathAfterBackup->text();
 
-        QHash<QString, QString> h;
+        QMultiHash<QString, QString> h;
         for(int i=0; i < model->rowCount(); i++)
         {
-            h.insertMulti(model->item(i, 0)->text(), TiBackupLib::convertPath2Generic(model->item(i, 1)->text(), lib.getMountDir(&part)));
+            h.insert(model->item(i, 0)->text(), TiBackupLib::convertPath2Generic(model->item(i, 1)->text(), lib.getMountDir(&part)));
         }
         job.backupdirs = h;
 
@@ -284,16 +284,16 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
         job.intervalDay = 0;
         switch(job.intervalType)
         {
-        case tiBackupJobIntervalNONE:
+        case tiBackupJobInterval::NONE:
             break;
-        case tiBackupJobIntervalDAILY:
+        case tiBackupJobInterval::DAILY:
             job.intervalTime = ui->teDailyTime->text();
             break;
-        case tiBackupJobIntervalWEEKLY:
+        case tiBackupJobInterval::WEEKLY:
             job.intervalTime = ui->teWeeklyTime->text();
             job.intervalDay = ui->cbWeeklyDay->currentIndex();
             break;
-        case tiBackupJobIntervalMONTHLY:
+        case tiBackupJobInterval::MONTHLY:
             job.intervalTime = ui->teMonthlyTime->text();
             job.intervalDay = ui->sbMonthlyDay->value();
             break;
@@ -304,17 +304,20 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
         job.encLUKSFilePath = "";
         switch(job.encLUKSType)
         {
-        case tiBackupEncLUKSNONE:
+        case tiBackupEncLUKS::NONE:
             break;
-        case tiBackupEncLUKSFILE:
+        case tiBackupEncLUKS::FILE:
             job.encLUKSFilePath = ui->leLUKSFilePath->text();
             break;
-        case tiBackupEncLUKSGENUSBDEV:
+        case tiBackupEncLUKS::GENUSBDEV:
             break;
         }
 
-        tiConfBackupJobs jobs;
-        jobs.saveBackupJob(job);
+        if(ipcClient::instance()->saveJob(job).status != ipcClient::STATUS::STATUS_OK)
+        {
+            QMessageBox::information(this, QString::fromUtf8("Add backupjob"), QString::fromUtf8("The backupjob could not be saved. Is the tiBackup service running?"));
+            return;
+        }
 
         parentWidget()->close();
 
@@ -341,7 +344,7 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
         if(currentJob->name != ui->leBackupJobName->text())
         {
             // We must rename the job
-            if(!jobs.renameJob(currentJob->name, ui->leBackupJobName->text()))
+            if(ipcClient::instance()->renameJob(currentJob->name, ui->leBackupJobName->text()).status != ipcClient::STATUS::STATUS_OK)
             {
                 QMessageBox::information(this, QString::fromUtf8("Edit backupjob"), QString::fromUtf8("The backupjob name could not be changed."));
                 return;
@@ -381,7 +384,7 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
         job.scriptBeforeBackup = ui->leScriptPathBeforeBackup->text();
         job.scriptAfterBackup = ui->leScriptPathAfterBackup->text();
 
-        QHash<QString, QString> h;
+        QMultiHash<QString, QString> h;
         QString dest;
         TiBackupLib lib;
         bool diskMounted = false;
@@ -397,7 +400,7 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
                 dest = TiBackupLib::convertPath2Generic(dest, lib.getMountDir(&part));
 
             //h.insertMulti(model->item(i, 0)->text(), TiBackupLib::convertPath2Generic(model->item(i, 1)->text(), lib.getMountDir(part.name)));
-            h.insertMulti(model->item(i, 0)->text(), dest);
+            h.insert(model->item(i, 0)->text(), dest);
         }
         job.backupdirs = h;
 
@@ -407,16 +410,16 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
         job.intervalDay = 0;
         switch(job.intervalType)
         {
-        case tiBackupJobIntervalNONE:
+        case tiBackupJobInterval::NONE:
             break;
-        case tiBackupJobIntervalDAILY:
+        case tiBackupJobInterval::DAILY:
             job.intervalTime = ui->teDailyTime->text();
             break;
-        case tiBackupJobIntervalWEEKLY:
+        case tiBackupJobInterval::WEEKLY:
             job.intervalTime = ui->teWeeklyTime->text();
             job.intervalDay = ui->cbWeeklyDay->currentIndex();
             break;
-        case tiBackupJobIntervalMONTHLY:
+        case tiBackupJobInterval::MONTHLY:
             job.intervalTime = ui->teMonthlyTime->text();
             job.intervalDay = ui->sbMonthlyDay->value();
             break;
@@ -427,16 +430,20 @@ void tiBackupAdd::on_btnAddBackupJob_clicked()
         job.encLUKSFilePath = "";
         switch(job.encLUKSType)
         {
-        case tiBackupEncLUKSNONE:
+        case tiBackupEncLUKS::NONE:
             break;
-        case tiBackupEncLUKSFILE:
+        case tiBackupEncLUKS::FILE:
             job.encLUKSFilePath = ui->leLUKSFilePath->text();
             break;
-        case tiBackupEncLUKSGENUSBDEV:
+        case tiBackupEncLUKS::GENUSBDEV:
             break;
         }
 
-        jobs.saveBackupJob(job);
+        if(ipcClient::instance()->saveJob(job).status != ipcClient::STATUS::STATUS_OK)
+        {
+            QMessageBox::information(this, QString::fromUtf8("Edit backupjob"), QString::fromUtf8("The backupjob could not be saved. Is the tiBackup service running?"));
+            return;
+        }
 
         parentWidget()->close();
 
@@ -669,7 +676,7 @@ void tiBackupAdd::updateJobDetails()
     ui->comboBackupDevice->setEditText(currentJob->device);
     ui->comboBackupPartition->setEditText(currentJob->partition_uuid);
 
-    QHashIterator<QString, QString> it(currentJob->backupdirs);
+    QMultiHashIterator<QString, QString> it(currentJob->backupdirs);
     QStandardItem *item = 0;
     QStandardItem *item2 = 0;
     int row = model->rowCount();
@@ -709,22 +716,22 @@ void tiBackupAdd::updateJobDetails()
     // Set defined task if any
     switch(currentJob->intervalType)
     {
-    case tiBackupJobIntervalNONE:
+    case tiBackupJobInterval::NONE:
         break;
-    case tiBackupJobIntervalDAILY:
+    case tiBackupJobInterval::DAILY:
     {
         ui->cbInterval->setCurrentIndex(static_cast<int>(currentJob->intervalType));
         ui->swIntervalSettings->setCurrentIndex(static_cast<int>(currentJob->intervalType));
         ui->teDailyTime->setDateTime(QDateTime::fromString(currentJob->intervalTime, "hh:mm"));
         break;
     }
-    case tiBackupJobIntervalWEEKLY:
+    case tiBackupJobInterval::WEEKLY:
         ui->cbInterval->setCurrentIndex(static_cast<int>(currentJob->intervalType));
         ui->swIntervalSettings->setCurrentIndex(static_cast<int>(currentJob->intervalType));
         ui->teWeeklyTime->setDateTime(QDateTime::fromString(currentJob->intervalTime, "hh:mm"));
         ui->cbWeeklyDay->setCurrentIndex(currentJob->intervalDay);
         break;
-    case tiBackupJobIntervalMONTHLY:
+    case tiBackupJobInterval::MONTHLY:
         ui->cbInterval->setCurrentIndex(static_cast<int>(currentJob->intervalType));
         ui->swIntervalSettings->setCurrentIndex(static_cast<int>(currentJob->intervalType));
         ui->teMonthlyTime->setDateTime(QDateTime::fromString(currentJob->intervalTime, "hh:mm"));
@@ -735,16 +742,16 @@ void tiBackupAdd::updateJobDetails()
     // Set defined LUKS settings if any
     switch(currentJob->encLUKSType)
     {
-    case tiBackupEncLUKSNONE:
+    case tiBackupEncLUKS::NONE:
         break;
-    case tiBackupEncLUKSFILE:
+    case tiBackupEncLUKS::FILE:
     {
         ui->cbLUKSOptions->setCurrentIndex(static_cast<int>(currentJob->encLUKSType));
         ui->swLUKSOptions->setCurrentIndex(static_cast<int>(currentJob->encLUKSType));
         ui->leLUKSFilePath->setText(currentJob->encLUKSFilePath);
         break;
     }
-    case tiBackupEncLUKSGENUSBDEV:
+    case tiBackupEncLUKS::GENUSBDEV:
         ui->cbLUKSOptions->setCurrentIndex(static_cast<int>(currentJob->encLUKSType));
         ui->swLUKSOptions->setCurrentIndex(static_cast<int>(currentJob->encLUKSType));
         break;

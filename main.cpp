@@ -26,21 +26,34 @@ Copyright (C) 2014 Rene Hadler, rene@hadler.me, https://hadler.me
 #include <QFile>
 #include <QTextStream>
 #include <QDateTime>
+#include <QStandardPaths>
+#include <QDir>
+
+#include "config.h"
 
 QFile *tibackupLog = 0;
 
 void logMessageOutput(QtMsgType type, const QMessageLogContext &, const QString & str)
 {
-    tiConfMain main_settings;
     QTextStream sout(stdout);
 
     if(tibackupLog == 0)
     {
-        tibackupLog = new QFile(QString("%1/tibackup.log").arg(main_settings.getValue("paths/logs").toString()));
+        // The GUI runs unprivileged: write our own log to a user-writable location
+        // (the daemon owns /etc/tibackup/logs/tibackup.log).
+        QString logDir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/tiBackupUi";
+        QDir().mkpath(logDir);
+        tibackupLog = new QFile(QString("%1/tibackupui.log").arg(logDir));
         tibackupLog->open(QIODevice::Append | QIODevice::Text);
     }
 
-    bool tidebug = main_settings.getValue("main/debug").toBool();
+    // main.conf is read-only for us and may not exist before the daemon initialises it.
+    bool tidebug = false;
+    if(QFile::exists(tibackup_config::file_main))
+    {
+        tiConfMain main_settings;
+        tidebug = main_settings.getValue("main/debug").toBool();
+    }
 
     QTextStream out(tibackupLog);
     QDateTime currentDate = QDateTime::currentDateTime();
@@ -78,8 +91,6 @@ int main(int argc, char *argv[])
     qRegisterMetaType<DeviceDiskPartition>("DeviceDiskPartition");
 
     QApplication a(argc, argv);
-
-    Q_INIT_RESOURCE(resdata);
 
     MainWindow w;
     w.show();

@@ -1,3 +1,10 @@
+tibackupui (0.8.0-1) precise; urgency=low
+
+  * Migrate to Qt6 and CMake build system (drop qmake)
+  * For changelog see git commits
+
+ -- Rene Hadler <rene@iksdeh.at>  Sat, 13 Jun 2026 12:00:00 +0200
+
 tibackupui (0.7.3-1) precise; urgency=low
 
   * For changelog see git commits

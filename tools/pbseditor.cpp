@@ -6,6 +6,7 @@
 
 #include "ticonf.h"
 #include "pbsclient.h"
+#include "ipcclient.h"
 
 PBSEditor::PBSEditor(QWidget *parent) :
     QDialog(parent),
@@ -54,7 +55,6 @@ void PBSEditor::on_buttonBox_accepted()
         return;
     }
 
-    tiConfPBServers *ticonfpb = tiConfPBServers::instance();
     PBServer p;
 
     if(action_type == ActionType_Edit)
@@ -70,7 +70,7 @@ void PBSEditor::on_buttonBox_accepted()
     p.fingerprint = ui->leFingerprint->text();
     p.keyfile = ui->leKeyFile->text();
     p.keypass = ui->leKeyPass->text();
-    ticonfpb->saveItem(p);
+    ipcClient::instance()->savePBServer(p);
 
     emit form_finished();
     done(0);
