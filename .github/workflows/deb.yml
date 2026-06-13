@@ -1,0 +1,66 @@
+name: deb
+
+# Build the tiBackupUi Debian package on dev (master) pushes and release tags.
+# tiBackupLib is built+installed as a .deb from the matching source ref first, so
+# the consumer .deb links and resolves its dependency against a real package
+# (find_package + dh_shlibdeps work). No external package repository is required.
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  workflow_dispatch:
+
+env:
+  # Same-named ref/tag of tiBackupLib (lockstep releases).
+  TIBACKUPLIB_REF: ${{ github.ref_name }}
+
+jobs:
+  debian-package:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout tiBackupUi
+        uses: actions/checkout@v4
+
+      - name: Checkout tiBackupLib (${{ env.TIBACKUPLIB_REF }})
+        uses: actions/checkout@v4
+        with:
+          repository: theinvisible/tiBackupLib
+          ref: ${{ env.TIBACKUPLIB_REF }}
+          path: _deps/tiBackupLib
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential devscripts debhelper cmake \
+            qt6-base-dev qt6-base-dev-tools \
+            libpoco-dev libudev-dev libblkid-dev uuid-dev \
+            rsync cryptsetup
+
+      - name: Build & install tiBackupLib Debian packages
+        run: |
+          ( cd _deps/tiBackupLib/tibackuplib-dev && echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=$(nproc)" -us -uc )
+          ( cd _deps/tiBackupLib && echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=$(nproc)" -us -uc )
+          sudo apt-get install -y ./_deps/tiBackupLib/tibackuplib-dev_*.deb ./_deps/tibackuplib_*.deb
+          # keep the consumer source tree clean for its own debuild
+          rm -rf _deps
+
+      - name: Build tiBackupUi Debian package
+        run: |
+          mkdir -p artifacts
+          echo "y" | debuild -eDEB_BUILD_OPTIONS="parallel=$(nproc)" -us -uc
+          mv ../tibackupui_*.deb artifacts/
+          ls -l artifacts/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tibackupui-deb
+          path: artifacts/*.deb
+
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.deb

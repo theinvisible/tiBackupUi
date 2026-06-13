@@ -4,9 +4,6 @@ name: build-check
 # source ref. Fast PR/build feedback without depending on a published package.
 
 on:
-  push:
-    branches: [master]
-    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
