@@ -5,10 +5,10 @@ stages:
 
 variables:
   TIBACKUPLIB_DEV_RELEASE: "0.8.0-1"
-  # Variant B build-check: tiBackupLib is built from this pinned source ref.
-  # Use a release tag (e.g. v0.8.0) for stable checks; during the Qt6 migration
-  # the matching branch is "qt6".
-  TIBACKUPLIB_REF: "qt6"
+  # Variant B build-check: tiBackupLib is built from the ref matching this build.
+  # $CI_COMMIT_REF_NAME is "master" for dev builds and the tag name for releases;
+  # lib and consumers are released in lockstep, so the same-named ref/tag must exist.
+  TIBACKUPLIB_REF: "$CI_COMMIT_REF_NAME"
   TIBACKUPLIB_URL: "https://github.com/theinvisible/tiBackupLib.git"
 
 # ---------------------------------------------------------------------------

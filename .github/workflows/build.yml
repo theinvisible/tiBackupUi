@@ -5,13 +5,16 @@ name: build-check
 
 on:
   push:
+    branches: [master]
+    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
 env:
-  # Pin the tiBackupLib version. Use a release tag (e.g. v0.8.0) for stable
-  # checks; during the Qt6 migration the matching branch is "qt6".
-  TIBACKUPLIB_REF: qt6
+  # Build tiBackupLib from the ref matching this build: the PR target branch,
+  # the pushed branch (master = dev build), or the release tag. Lib and consumers
+  # are released in lockstep, so the same-named ref/tag must exist in tiBackupLib.
+  TIBACKUPLIB_REF: ${{ github.base_ref || github.ref_name }}
 
 jobs:
   build:
