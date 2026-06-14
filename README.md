@@ -1,30 +1,92 @@
-This program tries to bring an important feature on the desktop and server for Linux: Backup
+# tiBackupUi
 
-![alt text](https://hadler.me/wordpress/wp-content/uploads/2014/08/tibackup1.png "tiBackupUi")
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](LICENSE)
+[![build-check](https://github.com/theinvisible/tiBackupUi/actions/workflows/build.yml/badge.svg)](https://github.com/theinvisible/tiBackupUi/actions/workflows/build.yml)
+[![Hosted By: Cloudsmith](https://img.shields.io/badge/OSS%20hosting%20by-cloudsmith-blue?logo=cloudsmith&style=flat-square)](https://cloudsmith.com)
 
-For a more detailed information why this project was made look in my post
+Graphical client of **tiBackup** — an intelligent, disk-based backup system for
+Linux desktops and servers. Plug in a USB disk and a predefined backup job runs
+automatically, or schedule jobs daily/weekly/monthly — with rsync, optional LUKS
+encryption, pre/post scripts, e-mail notifications and Proxmox Backup Server
+integration.
 
-The main features of the program are:
+![tiBackupUi](https://hadler.me/wordpress/wp-content/uploads/2014/08/tibackup1.png "tiBackupUi")
 
-    Make hotplug backups (you connect a disk to your computer and the tiBackup starts your predefined backup job)
-    Feature to send notification to eMailadress when backup is finished
-    Feature to execute a custom script before backup starts and after finished (special tiBackup VARS can be used to make it even more dynamic)
-    Use all available disks for backups
-    Backups can be started manually for testing
-    GUI for comfortable configuration of all settings but …
-    Scheduled backups (daily, weekly, monthly)
-    all settings are in simple .ini format, so you can also run tiBackup on a terminal only server
+> **This repository** contains `tiBackupUi`, the Qt6 Widgets **GUI** for configuring
+> backup jobs, preferences, PBS servers and scripts. It runs **unprivileged** and
+> performs all privileged actions through the daemon over IPC. See
+> [Architecture](#architecture).
 
-It is best to start with the GUI tool to make the initial configuration. The configuration is saved in path “/usr/local/etc/tibackup”, you can also edit the configuration by a texteditor. Daemon and GUI tool must be run as root (sudo, gksu, pkecex) as system files/devices must be accessed (libblkid for example)
+## Architecture
 
-Please note there is no documentation and configuration examples now. You should know about compilation of QT projects (qmake) and program dependencies in general if you want to compile it yourself. Also the program is still in beta state, so be warned.
+tiBackup consists of three parts:
 
-This program consists of three parts:
+| Component | Role |
+|-----------|------|
+| **[tiBackupLib](https://github.com/theinvisible/tiBackupLib)** | Shared core library (config, IPC, device handling, backup engine). |
+| **[tiBackup](https://github.com/theinvisible/tiBackup)** | Background daemon (`tibackupd`), runs as **root**, performs the actual backups and exposes an IPC + HTTP status API. |
+| **[tiBackupUi](https://github.com/theinvisible/tiBackupUi)** | Qt Widgets GUI to configure jobs and settings; runs **unprivileged** and talks to the daemon over IPC. |
 
-    tiBackupLib – Core library providing functions to GUI and Daemon
-    tiBackup – Backup daemon in background listening to udev/backup events
-    tiBackupUI – GUI tool for configuring the program (optional)
+The GUI never runs as root. Config writes, mounts, service control and starting
+backups are relayed to the root daemon over the IPC socket; only service
+start/stop is done via `systemctl` (which prompts through your polkit agent).
 
-It is always recommended to use the GIT “master” branch as i (should) always commit a working version of code.
+## Features
 
-Compile the programs in the order shown above. As dependencies there are the qt-core libraries (for GUI also the main QT libraries), libblkid (should be installed on every modern system) and POCO libraries (http://pocoproject.org/) needed. Please make sure the dependencies are found in your system (copy them in system path or edit the .pro files). Then just execute the compiled binaries for tiBackup and tiBackupUI.
+- Create, edit and delete **backup jobs** (devices, partitions, folders)
+- **Scheduling** (daily/weekly/monthly), checksum comparison, hotplug trigger
+- **LUKS encryption** and **Proxmox Backup Server (PBS)** configuration
+- **Pre/post-backup script** editor
+- E-mail/SMTP notification settings
+- Start backups manually and watch the live status/log
+- Start/stop the `tibackupd` service
+
+## Installation
+
+Pre-built Debian/Ubuntu packages are published via Cloudsmith:
+
+```bash
+curl -1sLf 'https://dl.cloudsmith.io/public/theinvisible/tibackup/setup.deb.sh' | sudo -E bash
+sudo apt install tibackup tibackupui    # daemon + GUI
+```
+
+Enable the daemon and add yourself to the `tibackup` group so the GUI may talk to it:
+
+```bash
+sudo systemctl enable --now tibackupd
+sudo usermod -aG tibackup "$USER"       # then log out and back in
+```
+
+Then launch **tiBackupUi** from your application menu (as your normal user).
+
+## Building from source
+
+Requirements (Debian/Ubuntu):
+
+```bash
+sudo apt install build-essential cmake qt6-base-dev \
+    libpoco-dev libudev-dev libblkid-dev uuid-dev rsync cryptsetup
+```
+
+Build `tiBackupLib` first (or check it out next to this repository so it is built
+automatically), then:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j"$(nproc)"
+```
+
+> A running `tibackupd` daemon is required for full functionality; the GUI opens
+> without it but shows a warning, since live device queries and backups go through
+> the daemon.
+
+## License
+
+Licensed under the **GNU General Public License v3.0 or later** (`GPL-3.0-or-later`).
+See [LICENSE](LICENSE).
+
+## Package hosting
+
+Package repository hosting is graciously provided by [Cloudsmith](https://cloudsmith.com).
+Cloudsmith is the only fully hosted, cloud-native, universal package management
+solution that lets you manage your software supply chain with confidence.
